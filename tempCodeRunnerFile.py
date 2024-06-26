@@ -1,3 +1,1 @@
-    # for row in original_csv_reader:
-    #     ORIGINAL_FIELDNAMES=row
-    #     break
+result['row_object']['Sheet Comparison Row ID']=id

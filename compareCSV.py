@@ -78,11 +78,38 @@ def create_results_folder():
 def write_list_csv(title,list,results_path):
     print('Creating '+title+' result csv')
     list.insert(0,title)
-    with open(results_path+'/'+title, 'w') as csvfile:
+    with open(results_path+'/'+title+'.csv', 'w') as csvfile:
         csv_writer = csv.writer(csvfile)
         for value in list:
             csv_writer.writerow([value])
     print('Created '+title+' result csv')
+
+def comparison_writer(original_data,final_data,comparison_fieldnames,results_path):
+    print('Comparing Data')
+    result_fieldnames=comparison_fieldnames[:]
+    result_fieldnames.insert(0,'Sheet Comparison Row ID')
+    with open(results_path+'/'+'Sheet Comparison.csv', 'w') as csvfile:
+        csv_writer = csv.DictWriter(csvfile,fieldnames=result_fieldnames)
+        csv_writer.writeheader()
+        for id, row in original_data.items():
+            compared_row = row_comparison(id,row,final_data,comparison_fieldnames)
+            if compared_row['differences']:
+                csv_writer.writerow(compared_row['row_object'])
+    print('Finished Comparing Data')
+
+def row_comparison(id,row,final_data,comparison_fieldnames):
+    result={'differences':False, 'row_object':{}}
+    result['row_object']['Sheet Comparison Row ID']=id
+    for name in comparison_fieldnames:
+        original_value=row[name]
+        final_value=final_data[id][name]
+        if original_value==final_value:
+            result['row_object'][name]=''
+        else:
+            result['differences']=True
+            result['row_object'][name]=original_value+' || '+final_value
+    return result
+
 
 
 ORIGINAL_FIELDNAMES = read_fieldnames('original.csv')
@@ -101,3 +128,5 @@ COMPARISON_FIELDNAMES=unmatched_results['comparison']
 
 write_list_csv("Original Unmatched Fieldnames", ORIGINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
 write_list_csv("Final Unmatched Fieldnames", FINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
+
+comparison_writer(ORIGINAL_DATA,FINAL_DATA,COMPARISON_FIELDNAMES,RESULTS_PATH)

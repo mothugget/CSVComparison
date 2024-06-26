@@ -61,6 +61,22 @@ def seperate_unmatched_fieldnames(original, final):
             'comparison': matched
             }
 
+def create_results_folder():
+    result_path = 'Results - '+str(datetime.datetime.today())[0:19]
+    os.makedirs(result_path)
+    print("Results folder created")
+    return result_path
+
+def write_list_csv(title,list,results_path):
+    print('Creating '+title+' result csv')
+    list.insert(0,title)
+    with open(results_path+'/'+title, 'w') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        for value in list:
+            csv_writer.writerow([value])
+    print('Created '+title+' result csv')
+
+
 ORIGINAL_FIELDNAMES = read_fieldnames('original.csv')
 FINAL_FIELDNAMES = read_fieldnames('final.csv')
 
@@ -75,17 +91,4 @@ ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_results['original_unmatched']
 FINAL_UNMATCHED_FIELDNAMES=unmatched_results['final_unmatched']
 COMPARISON_FIELDNAMES=unmatched_results['comparison']
 
-# print(ORIGINAL_UNMATCHED_FIELDNAMES)
-# print(FINAL_UNMATCHED_FIELDNAMES)
-# print(COMPARISON_FIELDNAMES)
-
-# a = [1, 2, 3, 4]
-# b = [x*x for x in a]
-# print(a,"\n",b )
-
-def create_results_folder():
-    result_path = 'Results - '+str(datetime.datetime.today())[0:19]
-    os.makedirs(result_path)
-    print("Results folder created")
-    return result_path
-
+write_list_csv("O F", ORIGINAL_FIELDNAMES, RESULTS_PATH)

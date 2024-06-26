@@ -21,31 +21,38 @@ testlist1 = [1,2,3,4,'E',5]
 testlist2 = [1,'W',2,3,4,'K',5]
 
 def read_fieldnames(file_path):
+    print('Reading '+file_path+' fieldnames')
     fieldnames=[]
     with open(file_path, 'r') as csvfile:
-        original_csv_reader = csv.reader(csvfile)
-        for row in original_csv_reader:
+        csv_reader = csv.reader(csvfile)
+        for row in csv_reader:
             fieldnames=row
             break
+    print('Finished reading '+file_path+' fieldnames')
     return fieldnames
 
 def read_row_id(file_path, id_fieldname):
+    print('Reading '+file_path+' row IDs')
     id_list=[]
     with open(file_path, 'r') as csvdictfile:
-        original_dict_csv_reader = csv.DictReader(csvdictfile)
-        for row in original_dict_csv_reader:
+        dict_csv_reader = csv.DictReader(csvdictfile)
+        for row in dict_csv_reader:
             id_list.append(row[id_fieldname])
+    print('Finished reading '+file_path+' row IDs')
     return id_list
 
 def parse_data(file_path):
+    print('Parsing '+file_path+' data')
     data_dict={}
     with open(file_path, 'r') as csvdictfile:
-        original_dict_csv_reader = csv.DictReader(csvdictfile)
-        for row in original_dict_csv_reader:
+        dict_csv_reader = csv.DictReader(csvdictfile)
+        for row in dict_csv_reader:
             data_dict[row['id']]=row
+    print('Finished parsing '+file_path+' data')
     return data_dict
 
 def seperate_unmatched_fieldnames(original, final):
+    print('Analysing unmatched fieldnames')
     matched = []
     final_unmatched = final[:]
     original_unmatched = []
@@ -55,6 +62,7 @@ def seperate_unmatched_fieldnames(original, final):
             matched.append(name)
         else:
             original_unmatched.append(name)
+    print('Finished analysing unmatched fieldnames')
     return {
             'original_unmatched':original_unmatched,
             'final_unmatched':final_unmatched,
@@ -91,4 +99,5 @@ ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_results['original_unmatched']
 FINAL_UNMATCHED_FIELDNAMES=unmatched_results['final_unmatched']
 COMPARISON_FIELDNAMES=unmatched_results['comparison']
 
-write_list_csv("O F", ORIGINAL_FIELDNAMES, RESULTS_PATH)
+write_list_csv("Original Unmatched Fieldnames", ORIGINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
+write_list_csv("Final Unmatched Fieldnames", FINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)

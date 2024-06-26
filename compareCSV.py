@@ -13,28 +13,30 @@ FINAL_DATA = {}
 testlist1 = [1,2,3,4,'E',5]
 testlist2 = [1,'W',2,3,4,'K',5]
 
+def read_fieldnames(file_path):
+    fieldnames=[]
+    with open(file_path, 'r') as csvfile:
+        original_csv_reader = csv.reader(csvfile)
+        for row in original_csv_reader:
+            fieldnames=row
+            break
+    return fieldnames
 
-with open('original.csv', 'r') as csvfile:
-    original_csv_reader = csv.reader(csvfile)
-    for row in original_csv_reader:
-        ORIGINAL_FIELDNAMES=row
-        break
+def read_id(file_path, id_fieldname):
+    id_list=[]
+    with open(file_path, 'r') as csvfile:
+        original_csv_reader = csv.reader(csvfile)
+        for row in original_csv_reader:
+            id_list.append(row[id_fieldname])
+    return id_list
 
-with open('original.csv', 'r') as csvdictfile:
-    original_dict_csv_reader = csv.DictReader(csvdictfile)
-    for row in original_dict_csv_reader:
-        ORIGINAL_DATA[row['id']]=row
-
-with open('final.csv', 'r') as csvfile:
-    final_csv_reader = csv.reader(csvfile)
-    for row in final_csv_reader:
-        FINAL_FIELDNAMES=row
-        break
-
-with open('final.csv', 'r') as csvdictfile:
-    final_dict_csv_reader = csv.DictReader(csvdictfile)
-    for row in final_dict_csv_reader:
-        FINAL_DATA[row['id']]=row
+def parse_data(file_path):
+    data_dict={}
+    with open(file_path, 'r') as csvdictfile:
+        original_dict_csv_reader = csv.DictReader(csvdictfile)
+        for row in original_dict_csv_reader:
+            data_dict[row['id']]=row
+    return data_dict
 
 def seperate_unmatched_fieldnames(original, final):
     return_dict = {}
@@ -47,6 +49,6 @@ def seperate_unmatched_fieldnames(original, final):
             matched.append(name)
         else:
             original_unmatched.append(name)
-    print(final)
+    print("original ",original_unmatched," final ",final_unmatched,' matched ', matched)
 
 seperate_unmatched_fieldnames(testlist1,testlist2)

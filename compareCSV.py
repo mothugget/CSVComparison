@@ -2,6 +2,9 @@ import csv
 import datetime
 import os
 
+ORIGINAL_PATH = ''
+FINAL_PATH=''
+
 ORIGINAL_FIELDNAMES = []
 FINAL_FIELDNAMES = []
 
@@ -11,6 +14,10 @@ COMPARISON_FIELDNAMES = []
 
 ORIGINAL_ROW_ID = []
 FINAL_ROW_ID = []
+
+ORIGINAL_UNMATCHED_ROW_ID = []
+FINAL_UNMATCHED_ROW_ID = []
+COMPARISON_ROW_ID = []
 
 ORIGINAL_DATA = {}
 FINAL_DATA = {}
@@ -51,8 +58,8 @@ def parse_data(file_path):
     print('Finished parsing '+file_path+' data')
     return data_dict
 
-def seperate_unmatched_fieldnames(original, final):
-    print('Analysing unmatched fieldnames')
+def separate_unmatched_values(original, final, type):
+    print('Analysing unmatched '+type)
     matched = []
     final_unmatched = final[:]
     original_unmatched = []
@@ -62,12 +69,14 @@ def seperate_unmatched_fieldnames(original, final):
             matched.append(name)
         else:
             original_unmatched.append(name)
-    print('Finished analysing unmatched fieldnames')
+    print('Finished analysing unmatched '+type)
     return {
             'original_unmatched':original_unmatched,
             'final_unmatched':final_unmatched,
             'comparison': matched
             }
+
+
 
 def create_results_folder():
     result_path = 'Results - '+str(datetime.datetime.today())[0:19]
@@ -84,15 +93,15 @@ def write_list_csv(title,list,results_path):
             csv_writer.writerow([value])
     print('Created '+title+' result csv')
 
-def comparison_writer(original_data,final_data,comparison_fieldnames,results_path):
+def comparison_writer(original_data,final_data,comparison_fieldnames,comparison_row_id,results_path):
     print('Comparing Data')
     result_fieldnames=comparison_fieldnames[:]
     result_fieldnames.insert(0,'Sheet Comparison Row ID')
     with open(results_path+'/'+'Sheet Comparison.csv', 'w') as csvfile:
         csv_writer = csv.DictWriter(csvfile,fieldnames=result_fieldnames)
         csv_writer.writeheader()
-        for id, row in original_data.items():
-            compared_row = row_comparison(id,row,final_data,comparison_fieldnames)
+        for id in comparison_row_id:
+            compared_row = row_comparison(id,original_data[id],final_data,comparison_fieldnames)
             if compared_row['differences']:
                 csv_writer.writerow(compared_row['row_object'])
     print('Finished Comparing Data')
@@ -121,12 +130,20 @@ FINAL_ROW_ID=read_row_id('final.csv','id')
 ORIGINAL_DATA=parse_data('original.csv')
 FINAL_DATA=parse_data('final.csv')
 
-unmatched_results=seperate_unmatched_fieldnames(ORIGINAL_FIELDNAMES,FINAL_FIELDNAMES)
-ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_results['original_unmatched']
-FINAL_UNMATCHED_FIELDNAMES=unmatched_results['final_unmatched']
-COMPARISON_FIELDNAMES=unmatched_results['comparison']
+unmatched_fieldname_results=separate_unmatched_values(ORIGINAL_FIELDNAMES,FINAL_FIELDNAMES,'fieldnames')
+ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['original_unmatched']
+FINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['final_unmatched']
+COMPARISON_FIELDNAMES=unmatched_fieldname_results['comparison']
 
 write_list_csv("Original Unmatched Fieldnames", ORIGINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
 write_list_csv("Final Unmatched Fieldnames", FINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
 
-comparison_writer(ORIGINAL_DATA,FINAL_DATA,COMPARISON_FIELDNAMES,RESULTS_PATH)
+unmatched_row_id_results=separate_unmatched_values(ORIGINAL_ROW_ID,FINAL_ROW_ID,'row ID')
+ORIGINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['original_unmatched']
+FINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['final_unmatched']
+COMPARISON_ROW_ID=unmatched_row_id_results['comparison']
+
+write_list_csv("Original Unmatched Row ID", ORIGINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
+write_list_csv("Final Unmatched Row ID", FINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
+
+comparison_writer(ORIGINAL_DATA,FINAL_DATA,COMPARISON_FIELDNAMES,COMPARISON_ROW_ID,RESULTS_PATH)

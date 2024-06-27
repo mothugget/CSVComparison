@@ -24,8 +24,8 @@ FINAL_DATA = {}
 
 RESULTS_PATH='Results'
 
-testlist1 = [1,2,3,4,'E',5]
-testlist2 = [1,'W',2,3,4,'K',5]
+testlist1 = [1,2,3,4,'E',5,'l','l']
+testlist2 = [1,'W',2,3,4,'K',5,'s','s']
 
 def read_fieldnames(file_path):
     print('Reading '+file_path+' fieldnames')
@@ -58,32 +58,39 @@ def parse_data(file_path):
     print('Finished parsing '+file_path+' data')
     return data_dict
 
+def separate_duplicate_values(list, type):
+    print('Analysing duplicate '+type)
+    duplicates =[]
+    unique=[]
+    for value in list:
+        if list.count(value)>1:
+            if duplicates.count(value)==0:
+                duplicates.append(value)
+        else:
+            unique.append(value)
+    print('Finished analysing duplicate '+type)
+    return {'duplicates':duplicates, 'unique':unique}
+
 def separate_unmatched_values(original, final, type):
     print('Analysing unmatched '+type)
     matched = []
     original_unmatched = []
-    original_duplicates = []
     final_unmatched = final[:]
-    final_duplicates = final[:]
 
     for name in original:
         if final.count(name)==0:
             original_unmatched.append(name)
-            final_duplicates.pop(final_duplicates.index(name))
-        elif final.count(name)>1:
-            original_duplicates.append(name)
+        elif final.count(name)>1:    
             final_unmatched.pop(final_unmatched.index(name))
         else:
-            final_unmatched.pop(final_unmatched.index(name))
-            final_duplicates.pop(final_duplicates.index(name))
+            final_unmatched.pop(final_unmatched.index(name))    
             matched.append(name)
     print('Finished analysing unmatched '+type)
     return {
             'original_unmatched':original_unmatched,
-            'final_unmatched':final_unmatched,
+            'final_unmatched':final_unmatched,        
             'comparison': matched
             }
-
 
 
 def create_results_folder():
@@ -129,29 +136,31 @@ def row_comparison(id,row,final_data,comparison_fieldnames):
 
 
 
-ORIGINAL_FIELDNAMES = read_fieldnames('original.csv')
-FINAL_FIELDNAMES = read_fieldnames('final.csv')
+# ORIGINAL_FIELDNAMES = read_fieldnames('original.csv')
+# FINAL_FIELDNAMES = read_fieldnames('final.csv')
 
-ORIGINAL_ROW_ID=read_row_id('original.csv','id')
-FINAL_ROW_ID=read_row_id('final.csv','id')
+# ORIGINAL_ROW_ID=read_row_id('original.csv','id')
+# FINAL_ROW_ID=read_row_id('final.csv','id')
 
-ORIGINAL_DATA=parse_data('original.csv')
-FINAL_DATA=parse_data('final.csv')
+# ORIGINAL_DATA=parse_data('original.csv')
+# FINAL_DATA=parse_data('final.csv')
 
-unmatched_fieldname_results=separate_unmatched_values(ORIGINAL_FIELDNAMES,FINAL_FIELDNAMES,'fieldnames')
-ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['original_unmatched']
-FINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['final_unmatched']
-COMPARISON_FIELDNAMES=unmatched_fieldname_results['comparison']
+# unmatched_fieldname_results=separate_unmatched_values(ORIGINAL_FIELDNAMES,FINAL_FIELDNAMES,'fieldnames')
+# ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['original_unmatched']
+# FINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['final_unmatched']
+# COMPARISON_FIELDNAMES=unmatched_fieldname_results['comparison']
 
-write_list_csv("Original Unmatched Fieldnames", ORIGINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
-write_list_csv("Final Unmatched Fieldnames", FINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
+# write_list_csv("Original Unmatched Fieldnames", ORIGINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
+# write_list_csv("Final Unmatched Fieldnames", FINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
 
-unmatched_row_id_results=separate_unmatched_values(ORIGINAL_ROW_ID,FINAL_ROW_ID,'row ID')
-ORIGINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['original_unmatched']
-FINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['final_unmatched']
-COMPARISON_ROW_ID=unmatched_row_id_results['comparison']
+# unmatched_row_id_results=separate_unmatched_values(ORIGINAL_ROW_ID,FINAL_ROW_ID,'row ID')
+# ORIGINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['original_unmatched']
+# FINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['final_unmatched']
+# COMPARISON_ROW_ID=unmatched_row_id_results['comparison']
 
-write_list_csv("Original Unmatched Row ID", ORIGINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
-write_list_csv("Final Unmatched Row ID", FINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
+# write_list_csv("Original Unmatched Row ID", ORIGINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
+# write_list_csv("Final Unmatched Row ID", FINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
 
-comparison_writer(ORIGINAL_DATA,FINAL_DATA,COMPARISON_FIELDNAMES,COMPARISON_ROW_ID,RESULTS_PATH)
+# comparison_writer(ORIGINAL_DATA,FINAL_DATA,COMPARISON_FIELDNAMES,COMPARISON_ROW_ID,RESULTS_PATH)
+
+print(separate_duplicate_values(testlist2,'fieldnames'))

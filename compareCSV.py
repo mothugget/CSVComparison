@@ -61,14 +61,22 @@ def parse_data(file_path):
 def separate_unmatched_values(original, final, type):
     print('Analysing unmatched '+type)
     matched = []
-    final_unmatched = final[:]
     original_unmatched = []
+    original_duplicates = []
+    final_unmatched = final[:]
+    final_duplicates = final[:]
+
     for name in original:
-        if final.count(name)>0:
-            final_unmatched.pop(final_unmatched.index(name))
-            matched.append(name)
-        else:
+        if final.count(name)==0:
             original_unmatched.append(name)
+            final_duplicates.pop(final_duplicates.index(name))
+        elif final.count(name)>1:
+            original_duplicates.append(name)
+            final_unmatched.pop(final_unmatched.index(name))
+        else:
+            final_unmatched.pop(final_unmatched.index(name))
+            final_duplicates.pop(final_duplicates.index(name))
+            matched.append(name)
     print('Finished analysing unmatched '+type)
     return {
             'original_unmatched':original_unmatched,

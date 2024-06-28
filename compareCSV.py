@@ -115,33 +115,67 @@ def row_comparison(id, original_data, final_data, comparison_fieldnames):
             result['row_object'][name] = original_value + ' || ' + final_value
     return result
 
-original_fieldnames = read_fieldnames('original.csv')
-final_fieldnames = read_fieldnames('final.csv')
+def read_csv_data(original, final):
+    try:
+        original_fieldnames = read_fieldnames(original)
+    except Exception as e:
+        print(f"Error reading fieldnames from original: {e}")
 
-original_row_id = read_row_id('original.csv', 'id')
-final_row_id = read_row_id('final.csv', 'id')
+    try:
+        final_fieldnames = read_fieldnames(final)
+    except Exception as e:
+        print(f"Error reading fieldnames from final: {e}")
 
-original_data = parse_data('original.csv')
-final_data = parse_data('final.csv')
+    try:
+        original_row_id = read_row_id(original, 'id')
+    except Exception as e:
+        print(f"Error reading row ID from original: {e}")
 
-original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(original_fieldnames, 'Original Fieldnames').values()
-write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, results_path)
+    try:
+        final_row_id = read_row_id(final, 'id')
+    except Exception as e:
+        print(f"Error reading row ID from final: {e}")
 
-final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(final_fieldnames, 'Final Fieldnames').values()
-write_list_csv('Final Duplicate Fieldnames', final_duplicate_fieldnames, results_path)
+    try:
+        original_data = parse_data(original)
+    except Exception as e:
+        print(f"Error parsing data from original: {e}")
 
-original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, original_duplicate_fieldnames, final_duplicate_fieldnames, 'fieldnames').values()
-write_list_csv("Original Unmatched Fieldnames", original_unmatched_fieldnames, results_path)
-write_list_csv("Final Unmatched Fieldnames", final_unmatched_fieldnames, results_path)
+    try:
+        final_data = parse_data(final)
+    except Exception as e:
+        print(f"Error parsing data from final: {e}")
+    return {
+                "original_fieldnames": original_fieldnames,
+                "final_fieldnames": final_fieldnames,
+                "original_row_id": original_row_id,
+                "final_row_id": final_row_id,
+                "original_data": original_data,
+                "final_data": final_data
+            }
 
-original_duplicate_row_id, original_unique_row_id = separate_duplicate_values(original_row_id, 'Original Row ID').values()
-write_list_csv('Original Duplicate Row ID', original_duplicate_row_id, results_path)
+print(eval(input('hi'))['unique'])
 
-final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(final_row_id, 'Final Row ID').values()
-write_list_csv('Final Duplicate Row ID', final_duplicate_row_id, results_path)
+# original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(original_fieldnames, 'Original Fieldnames').values()
+# write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, results_path)
 
-original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, original_duplicate_row_id, final_duplicate_row_id, 'row ID').values()
-write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, results_path)
-write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, results_path)
+# final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(final_fieldnames, 'Final Fieldnames').values()
+# write_list_csv('Final Duplicate Fieldnames', final_duplicate_fieldnames, results_path)
 
-comparison_writer(original_data, final_data, comparison_fieldnames, comparison_row_id, results_path)
+# original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, original_duplicate_fieldnames, final_duplicate_fieldnames, 'fieldnames').values()
+# write_list_csv("Original Unmatched Fieldnames, original_unmatched_fieldnames, results_path)
+# write_list_csv("Final Unmatched Fieldnames, final_unmatched_fieldnames, results_path)
+
+# original_duplicate_row_id, original_unique_row_id = separate_duplicate_values(original_row_id, 'Original Row ID').values()
+# write_list_csv('Original Duplicate Row ID', original_duplicate_row_id, results_path)
+
+# final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(final_row_id, 'Final Row ID').values()
+# write_list_csv('Final Duplicate Row ID', final_duplicate_row_id, results_path)
+
+# original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, original_duplicate_row_id, final_duplicate_row_id, 'row ID').values()
+# write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, results_path)
+# write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, results_path)
+
+
+
+# comparison_writer(original_data, final_data, comparison_fieldnames, comparison_row_id, results_path)

@@ -115,43 +115,32 @@ def row_comparison(id, original_data, final_data, comparison_fieldnames):
             result['row_object'][name] = original_value + ' || ' + final_value
     return result
 
-def read_csv_data(original, final):
+def read_csv_data(original, final, id_fieldname):
+    continue_script=True
     try:
         original_fieldnames = read_fieldnames(original)
-    except Exception as e:
-        print(f"Error reading fieldnames from original: {e}")
-
-    try:
         final_fieldnames = read_fieldnames(final)
-    except Exception as e:
-        print(f"Error reading fieldnames from final: {e}")
-
-    try:
-        original_row_id = read_row_id(original, 'id')
-    except Exception as e:
-        print(f"Error reading row ID from original: {e}")
-
-    try:
-        final_row_id = read_row_id(final, 'id')
-    except Exception as e:
-        print(f"Error reading row ID from final: {e}")
-
-    try:
-        original_data = parse_data(original)
-    except Exception as e:
-        print(f"Error parsing data from original: {e}")
-
-    try:
+        original_row_id = read_row_id(original, id_fieldname)   
+        final_row_id = read_row_id(final, id_fieldname)    
+        original_data = parse_data(original)    
         final_data = parse_data(final)
     except Exception as e:
-        print(f"Error parsing data from final: {e}")
+        print(f"Error parsing data: {e}")
+        continue_script=False
+        original_fieldnames=None
+        final_fieldnames=None
+        original_row_id=None
+        final_row_id=None
+        original_data=None
+        final_data=None
     return {
-                "original_fieldnames": original_fieldnames,
-                "final_fieldnames": final_fieldnames,
-                "original_row_id": original_row_id,
-                "final_row_id": final_row_id,
-                "original_data": original_data,
-                "final_data": final_data
+                'continue_script':continue_script,
+                'original_fieldnames': original_fieldnames,
+                'final_fieldnames': final_fieldnames,
+                'original_row_id': original_row_id,
+                'final_row_id': final_row_id,
+                'original_data': original_data,
+                'final_data': final_data
             }
 
 print(eval(input('hi'))['unique'])

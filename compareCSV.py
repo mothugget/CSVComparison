@@ -78,7 +78,6 @@ def separate_duplicate_values(list, type):
         else:
             unique.append(value)
     print('Finished analysing duplicate '+type)
-    print({'duplicates':duplicates, 'unique':unique})
     return {'duplicates':duplicates, 'unique':unique}
 
 def separate_unmatched_values(original, final, original_duplicates, final_duplicates, type):
@@ -104,7 +103,6 @@ def separate_unmatched_values(original, final, original_duplicates, final_duplic
             'final_unmatched':final_unmatched,        
             'comparison': matched
             }
-
 
 def create_results_folder():
     result_path = 'Results - '+str(datetime.datetime.today())[0:19]
@@ -156,40 +154,24 @@ FINAL_ROW_ID=read_row_id('final.csv','id')
 ORIGINAL_DATA=parse_data('original.csv')
 FINAL_DATA=parse_data('final.csv')
 
-duplicate_original_fieldname_results=separate_duplicate_values(ORIGINAL_FIELDNAMES,'Original Fieldnames')
-ORIGINAL_UNIQUE_FIELDNAMES=duplicate_original_fieldname_results['unique']
-ORIGINAL_DUPLICATE_FIELDNAMES=duplicate_original_fieldname_results['duplicates']
+ORIGINAL_DUPLICATE_FIELDNAMES,ORIGINAL_UNIQUE_FIELDNAMES=separate_duplicate_values(ORIGINAL_FIELDNAMES,'Original Fieldnames').values()
 write_list_csv('Original Duplicate Fieldnames',ORIGINAL_DUPLICATE_FIELDNAMES,RESULTS_PATH)
 
-duplicate_final_fieldname_results=separate_duplicate_values(FINAL_FIELDNAMES,'Final Fieldnames')
-FINAL_UNIQUE_FIELDNAMES=duplicate_final_fieldname_results['unique']
-FINAL_DUPLICATE_FIELDNAMES=duplicate_final_fieldname_results['duplicates']
+FINAL_DUPLICATE_FIELDNAMES,FINAL_UNIQUE_FIELDNAMES=separate_duplicate_values(FINAL_FIELDNAMES,'Final Fieldnames').values()
 write_list_csv('Final Duplicate Fieldnames',FINAL_DUPLICATE_FIELDNAMES,RESULTS_PATH)
 
-unmatched_fieldname_results=separate_unmatched_values(ORIGINAL_UNIQUE_FIELDNAMES,FINAL_UNIQUE_FIELDNAMES,ORIGINAL_DUPLICATE_FIELDNAMES,FINAL_DUPLICATE_FIELDNAMES,'fieldnames')
-ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['original_unmatched']
-FINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['final_unmatched']
-COMPARISON_FIELDNAMES=unmatched_fieldname_results['comparison']
+ORIGINAL_UNMATCHED_FIELDNAMES,FINAL_UNMATCHED_FIELDNAMES,COMPARISON_FIELDNAMES=separate_unmatched_values(ORIGINAL_UNIQUE_FIELDNAMES,FINAL_UNIQUE_FIELDNAMES,ORIGINAL_DUPLICATE_FIELDNAMES,FINAL_DUPLICATE_FIELDNAMES,'fieldnames').values()
 write_list_csv("Original Unmatched Fieldnames", ORIGINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
 write_list_csv("Final Unmatched Fieldnames", FINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
 
-duplicate_original_row_id_results=separate_duplicate_values(ORIGINAL_ROW_ID,'Original Row ID')
-ORIGINAL_UNIQUE_ROW_ID=duplicate_original_row_id_results['unique']
-ORIGINAL_DUPLICATE_ROW_ID=duplicate_original_row_id_results['duplicates']
+ORIGINAL_DUPLICATE_ROW_ID,ORIGINAL_UNIQUE_ROW_ID=separate_duplicate_values(ORIGINAL_ROW_ID,'Original Row ID').values()
 write_list_csv('Original Duplicate Row ID',ORIGINAL_DUPLICATE_ROW_ID,RESULTS_PATH)
 
-duplicate_final_row_id_results=separate_duplicate_values(FINAL_ROW_ID,'Final Row ID')
-FINAL_UNIQUE_ROW_ID=duplicate_final_row_id_results['unique']
-FINAL_DUPLICATE_ROW_ID=duplicate_final_row_id_results['duplicates']
+FINAL_DUPLICATE_ROW_ID,FINAL_UNIQUE_ROW_ID=separate_duplicate_values(FINAL_ROW_ID,'Final Row ID').values()
 write_list_csv('Final Duplicate Row ID',FINAL_DUPLICATE_ROW_ID,RESULTS_PATH)
 
-unmatched_row_id_results=separate_unmatched_values(ORIGINAL_UNIQUE_ROW_ID,FINAL_UNIQUE_ROW_ID,ORIGINAL_DUPLICATE_ROW_ID,FINAL_DUPLICATE_ROW_ID,'row ID')
-ORIGINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['original_unmatched']
-FINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['final_unmatched']
-COMPARISON_ROW_ID=unmatched_row_id_results['comparison']
+ORIGINAL_UNMATCHED_ROW_ID,FINAL_UNMATCHED_ROW_ID,COMPARISON_ROW_ID=separate_unmatched_values(ORIGINAL_UNIQUE_ROW_ID,FINAL_UNIQUE_ROW_ID,ORIGINAL_DUPLICATE_ROW_ID,FINAL_DUPLICATE_ROW_ID,'row ID').values()
 write_list_csv("Original Unmatched Row ID", ORIGINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
 write_list_csv("Final Unmatched Row ID", FINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
 
 comparison_writer(ORIGINAL_DATA,FINAL_DATA,COMPARISON_FIELDNAMES,COMPARISON_ROW_ID,RESULTS_PATH)
-
-

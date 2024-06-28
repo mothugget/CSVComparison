@@ -116,16 +116,16 @@ def comparison_writer(original_data,final_data,comparison_fieldnames,comparison_
         csv_writer = csv.DictWriter(csvfile,fieldnames=result_fieldnames)
         csv_writer.writeheader()
         for id in comparison_row_id:
-            compared_row = row_comparison(id,original_data[id],final_data,comparison_fieldnames)
+            compared_row = row_comparison(id,original_data,final_data,comparison_fieldnames)
             if compared_row['differences']:
                 csv_writer.writerow(compared_row['row_object'])
     print('Finished Comparing Data')
 
-def row_comparison(id,row,final_data,comparison_fieldnames):
+def row_comparison(id,original_data,final_data,comparison_fieldnames):
     result={'differences':False, 'row_object':{}}
     result['row_object']['Sheet Comparison Row ID']=id
     for name in comparison_fieldnames:
-        original_value=row[name]
+        original_value=original_data[id][name]
         final_value=final_data[id][name]
         if original_value==final_value:
             result['row_object'][name]=''
@@ -134,33 +134,31 @@ def row_comparison(id,row,final_data,comparison_fieldnames):
             result['row_object'][name]=original_value+' || '+final_value
     return result
 
+ORIGINAL_FIELDNAMES = read_fieldnames('original.csv')
+FINAL_FIELDNAMES = read_fieldnames('final.csv')
+
+ORIGINAL_ROW_ID=read_row_id('original.csv','id')
+FINAL_ROW_ID=read_row_id('final.csv','id')
+
+ORIGINAL_DATA=parse_data('original.csv')
+FINAL_DATA=parse_data('final.csv')
+
+unmatched_fieldname_results=separate_unmatched_values(ORIGINAL_FIELDNAMES,FINAL_FIELDNAMES,'fieldnames')
+ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['original_unmatched']
+FINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['final_unmatched']
+COMPARISON_FIELDNAMES=unmatched_fieldname_results['comparison']
+
+write_list_csv("Original Unmatched Fieldnames", ORIGINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
+write_list_csv("Final Unmatched Fieldnames", FINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
+
+unmatched_row_id_results=separate_unmatched_values(ORIGINAL_ROW_ID,FINAL_ROW_ID,'row ID')
+ORIGINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['original_unmatched']
+FINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['final_unmatched']
+COMPARISON_ROW_ID=unmatched_row_id_results['comparison']
+
+write_list_csv("Original Unmatched Row ID", ORIGINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
+write_list_csv("Final Unmatched Row ID", FINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
+
+comparison_writer(ORIGINAL_DATA,FINAL_DATA,COMPARISON_FIELDNAMES,COMPARISON_ROW_ID,RESULTS_PATH)
 
 
-# ORIGINAL_FIELDNAMES = read_fieldnames('original.csv')
-# FINAL_FIELDNAMES = read_fieldnames('final.csv')
-
-# ORIGINAL_ROW_ID=read_row_id('original.csv','id')
-# FINAL_ROW_ID=read_row_id('final.csv','id')
-
-# ORIGINAL_DATA=parse_data('original.csv')
-# FINAL_DATA=parse_data('final.csv')
-
-# unmatched_fieldname_results=separate_unmatched_values(ORIGINAL_FIELDNAMES,FINAL_FIELDNAMES,'fieldnames')
-# ORIGINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['original_unmatched']
-# FINAL_UNMATCHED_FIELDNAMES=unmatched_fieldname_results['final_unmatched']
-# COMPARISON_FIELDNAMES=unmatched_fieldname_results['comparison']
-
-# write_list_csv("Original Unmatched Fieldnames", ORIGINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
-# write_list_csv("Final Unmatched Fieldnames", FINAL_UNMATCHED_FIELDNAMES, RESULTS_PATH)
-
-# unmatched_row_id_results=separate_unmatched_values(ORIGINAL_ROW_ID,FINAL_ROW_ID,'row ID')
-# ORIGINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['original_unmatched']
-# FINAL_UNMATCHED_ROW_ID=unmatched_row_id_results['final_unmatched']
-# COMPARISON_ROW_ID=unmatched_row_id_results['comparison']
-
-# write_list_csv("Original Unmatched Row ID", ORIGINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
-# write_list_csv("Final Unmatched Row ID", FINAL_UNMATCHED_ROW_ID, RESULTS_PATH)
-
-# comparison_writer(ORIGINAL_DATA,FINAL_DATA,COMPARISON_FIELDNAMES,COMPARISON_ROW_ID,RESULTS_PATH)
-
-print(separate_duplicate_values(testlist2,'fieldnames'))

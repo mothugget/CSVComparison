@@ -1,13 +1,13 @@
 import csv
 import datetime
 import os
-
+print('Welcome to the CSV comparison script')
 run_script:bool = True
 
 while run_script == True:
 
     try:
-        original_path,final_path=eval(input('hi'))
+        original_path,final_path=eval(input("{'original_path': 'path1','final_path': 'path2'}\n"))
     except Exception as e:
         print(f'There seems to be an error \n{e}\n')
         continue_script=False
@@ -18,7 +18,9 @@ while run_script == True:
                 try_again=False
             except Exception as e:
                 print(f"Sorry, didn't quite catch that. Remember answers are case sensitive \n {e}\n")
-
+    print(original_path)
+    print(final_path)
+    run_script=False
 
 
 

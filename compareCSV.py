@@ -2,10 +2,28 @@ import csv
 import datetime
 import os
 
-original_path = ''
-final_path = ''
+run_script:bool = True
 
-results_path = 'Results'
+while run_script == True:
+
+    try:
+        original_path,final_path=eval(input('hi'))
+    except Exception as e:
+        print(f'There seems to be an error \n{e}\n')
+        continue_script=False
+        try_again=True
+        while try_again==True:
+            try:
+                run_script=eval(input('Would you like to try again? (True/False)'))
+                try_again=False
+            except Exception as e:
+                print(f"Sorry, didn't quite catch that. Remember answers are case sensitive \n {e}\n")
+
+
+
+
+
+
 
 def read_fieldnames(file_path):
     print('Reading ' + file_path + ' fieldnames')
@@ -115,15 +133,17 @@ def row_comparison(id, original_data, final_data, comparison_fieldnames):
             result['row_object'][name] = original_value + ' || ' + final_value
     return result
 
-def read_csv_data(original, final, id_fieldname):
+def read_csv_data(original_path='', final_path='', id_fieldname=None):
     continue_script=True
     try:
-        original_fieldnames = read_fieldnames(original)
-        final_fieldnames = read_fieldnames(final)
-        original_row_id = read_row_id(original, id_fieldname)   
-        final_row_id = read_row_id(final, id_fieldname)    
-        original_data = parse_data(original)    
-        final_data = parse_data(final)
+        original_fieldnames = read_fieldnames(original_path)
+        if id_fieldname==None:
+            id_fieldname=original_fieldnames[0]
+        final_fieldnames = read_fieldnames(final_path)
+        original_row_id = read_row_id(original_path, id_fieldname)   
+        final_row_id = read_row_id(final_path, id_fieldname)    
+        original_data = parse_data(original_path)    
+        final_data = parse_data(final_path)
     except Exception as e:
         print(f"Error parsing data: {e}")
         continue_script=False
@@ -143,7 +163,10 @@ def read_csv_data(original, final, id_fieldname):
                 'final_data': final_data
             }
 
-print(eval(input('hi'))['unique'])
+
+
+
+
 
 # original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(original_fieldnames, 'Original Fieldnames').values()
 # write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, results_path)

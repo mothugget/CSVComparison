@@ -1,32 +1,6 @@
 import csv
 import datetime
 import os
-print('Welcome to the CSV comparison script')
-run_script:bool = True
-
-while run_script == True:
-
-    try:
-        original_path,final_path,id_fieldname=eval(input("{'original_path': 'path1','final_path': 'path2',id_fieldname:'id'}\n"))
-    except Exception as e:
-        print(f'There seems to be an error \n{e}\n')
-        continue_script=False
-        try_again=True
-        while try_again==True:
-            try:
-                run_script=eval(input('Would you like to try again? (True/False)'))
-                try_again=False
-            except Exception as e:
-                print(f"Sorry, didn't quite catch that. Remember answers are case sensitive \n {e}\n")
-    if continue_script:
-        print(original_path)
-        print(final_path)
-    
-
-
-
-
-
 
 def read_fieldnames(file_path):
     print('Reading ' + file_path + ' fieldnames')
@@ -136,11 +110,15 @@ def row_comparison(id, original_data, final_data, comparison_fieldnames):
             result['row_object'][name] = original_value + ' || ' + final_value
     return result
 
-def read_csv_data(original_path='', final_path='', id_fieldname=None):
-    continue_script=True
+def read_csv_data(original_path, final_path, id_fieldname):
+    continue_to_next_function=True
     try:
+        if original_path=='':
+            original_path='original.csv'
+        if final_path=='':
+            final_path='final.csv'
         original_fieldnames = read_fieldnames(original_path)
-        if id_fieldname==None:
+        if id_fieldname=='':
             id_fieldname=original_fieldnames[0]
         final_fieldnames = read_fieldnames(final_path)
         original_row_id = read_row_id(original_path, id_fieldname)   
@@ -149,7 +127,7 @@ def read_csv_data(original_path='', final_path='', id_fieldname=None):
         final_data = parse_data(final_path)
     except Exception as e:
         print(f"Error parsing data: {e}")
-        continue_script=False
+        continue_to_next_function=False
         original_fieldnames=None
         final_fieldnames=None
         original_row_id=None
@@ -157,7 +135,7 @@ def read_csv_data(original_path='', final_path='', id_fieldname=None):
         original_data=None
         final_data=None
     return {
-                'continue_script':continue_script,
+                'continue_script':continue_to_next_function,
                 'original_fieldnames': original_fieldnames,
                 'final_fieldnames': final_fieldnames,
                 'original_row_id': original_row_id,
@@ -166,7 +144,31 @@ def read_csv_data(original_path='', final_path='', id_fieldname=None):
                 'final_data': final_data
             }
 
+print('Welcome to the CSV comparison script')
+run_script:bool = True
+continue_script=True
+while run_script == True:
 
+    try:
+        original_path,final_path,id_fieldname=eval(input("{'original_path': '','final_path': '','id_fieldname':''}\n")).values()
+    except Exception as e:
+        print(f'There seems to be an error \n{e}\n')
+        continue_script=False
+        try_again=True
+        try_counter=0
+        while try_again==True and try_counter<3:
+            try_counter+=1
+            try:
+                run_script=eval(input('Would you like to try again? (True/False)'))
+                try_again=False
+            except Exception as e:
+                print(f"Sorry, didn't quite catch that. Remember answers are case sensitive \n {e}\n")
+                if try_counter==3:
+                    print("You've tried this three times now. I'm giving up on you.")
+                    run_script=False
+    if continue_script:
+        print(read_csv_data(original_path,final_path,id_fieldname))
+        run_script=False
 
 
 

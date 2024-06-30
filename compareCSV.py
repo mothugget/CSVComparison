@@ -113,12 +113,12 @@ def row_comparison(id, original_data, final_data, comparison_fieldnames):
 def read_csv_data(original_path, final_path, id_fieldname):
     continue_to_next_function=True
     try:
-        if original_path=='':
+        if original_path==None:
             original_path='original.csv'
-        if final_path=='':
+        if final_path==None:
             final_path='final.csv'
         original_fieldnames = read_fieldnames(original_path)
-        if id_fieldname=='':
+        if id_fieldname==None:
             id_fieldname=original_fieldnames[0]
         final_fieldnames = read_fieldnames(final_path)
         original_row_id = read_row_id(original_path, id_fieldname)   
@@ -144,31 +144,47 @@ def read_csv_data(original_path, final_path, id_fieldname):
                 'final_data': final_data
             }
 
+def true_false_input(prompt):
+    try_again=True
+    try_counter=0
+    while try_again==True and try_counter<3:
+        try_counter+=1
+        try:
+            input_value:bool=eval(input(prompt+'\n(True/False)'))
+            try_again=False
+            return_object = {'input':input_value,'valid_input':True}
+        except Exception as e:
+            print(f"Sorry, didn't quite catch that. Remember answers are case sensitive \n {e}\n")
+            if try_counter==3:
+                print("You've tried this three times now. I'm giving up on you.")
+                return_object =  {'input':None,'valid_input':False}
+    return return_object
+
+#Script starts here
+
 print('Welcome to the CSV comparison script')
 run_script:bool = True
 continue_script=True
 while run_script == True:
+    original_path=None
+    final_path=None
+    id_fieldname=None
+    print('By default, this script looks at the directory in which it resides. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
+    custom_config=true_false_input('Would you like to add your own custom config?')
+    continue_script=custom_config['valid_input']
+    if continue_script and custom_config['input']:
+        try:
+            original_path,final_path,id_fieldname=eval(input("{'original_path': '','final_path': '','id_fieldname':''}\n")).values()
+        except Exception as e:
+            print(f'There seems to be an error \n{e}\n')
+            continue_script=False
+            try_again_input=true_false_input('Would you like to try again?')
+            if try_again_input['valid_input']:
+                run_script=try_again_input['input']
+            else:run_script=False
 
-    try:
-        original_path,final_path,id_fieldname=eval(input("{'original_path': '','final_path': '','id_fieldname':''}\n")).values()
-    except Exception as e:
-        print(f'There seems to be an error \n{e}\n')
-        continue_script=False
-        try_again=True
-        try_counter=0
-        while try_again==True and try_counter<3:
-            try_counter+=1
-            try:
-                run_script=eval(input('Would you like to try again? (True/False)'))
-                try_again=False
-            except Exception as e:
-                print(f"Sorry, didn't quite catch that. Remember answers are case sensitive \n {e}\n")
-                if try_counter==3:
-                    print("You've tried this three times now. I'm giving up on you.")
-                    run_script=False
-    if continue_script:
-        print(read_csv_data(original_path,final_path,id_fieldname))
-        run_script=False
+    print(read_csv_data(original_path,final_path,id_fieldname))
+    run_script=False
 
 
 

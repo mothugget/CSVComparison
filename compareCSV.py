@@ -110,21 +110,21 @@ def row_comparison(id, original_data, final_data, comparison_fieldnames):
             result['row_object'][name] = original_value + ' || ' + final_value
     return result
 
-def read_csv_data(original_path, final_path, id_fieldname):
+def read_csv_data(props):
     continue_to_next_function=True
     try:
-        if original_path==None:
-            original_path='original.csv'
-        if final_path==None:
-            final_path='final.csv'
-        original_fieldnames = read_fieldnames(original_path)
-        if id_fieldname==None:
+        if props['original_path']==None:
+            props['original_path']='original.csv'
+        if props['final_path']==None:
+            props['final_path']='final.csv'
+        original_fieldnames = read_fieldnames(props['original_path'])
+        if props['id_fieldname']==None:
             id_fieldname=original_fieldnames[0]
-        final_fieldnames = read_fieldnames(final_path)
-        original_row_id = read_row_id(original_path, id_fieldname)   
-        final_row_id = read_row_id(final_path, id_fieldname)    
-        original_data = parse_data(original_path)    
-        final_data = parse_data(final_path)
+        final_fieldnames = read_fieldnames(props['final_path'])
+        original_row_id = read_row_id(props['original_path'], id_fieldname)   
+        final_row_id = read_row_id(props['final_path'], id_fieldname)    
+        original_data = parse_data(props['original_path'])    
+        final_data = parse_data(props['final_path'])
     except Exception as e:
         print(f"Error parsing data: {e}")
         continue_to_next_function=False
@@ -166,15 +166,16 @@ print('Welcome to the CSV comparison script')
 run_script:bool = True
 continue_script=True
 while run_script == True:
-    original_path=None
-    final_path=None
-    id_fieldname=None
+    read_csv_props = {
+        'original_path':None,
+        'final_path':None,
+        'id_fieldname':None}
     print('By default, this script looks at the directory in which it resides. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
     custom_config=true_false_input('Would you like to add your own custom config?')
     continue_script=custom_config['valid_input']
     if continue_script and custom_config['input']:
         try:
-            original_path,final_path,id_fieldname=eval(input("{'original_path': '','final_path': '','id_fieldname':''}\n")).values()
+            read_csv_props=eval(input("{'original_path': '','final_path': '','id_fieldname':''}\n")).values()
         except Exception as e:
             print(f'There seems to be an error \n{e}\n')
             continue_script=False
@@ -183,7 +184,7 @@ while run_script == True:
                 run_script=try_again_input['input']
             else:run_script=False
 
-    print(read_csv_data(original_path,final_path,id_fieldname))
+    print(read_csv_data(read_csv_props))
     run_script=False
 
 

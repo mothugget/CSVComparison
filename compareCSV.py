@@ -164,6 +164,12 @@ def true_false_input(prompt):
                 return_object =  {'input':None,'valid_input':False}
     return return_object
 
+def try_again():
+    try_again_input=true_false_input('Would you like to try again?')
+    if try_again_input['valid_input']:
+        return try_again_input['input']
+    else:return False
+
 def extract_duplicate_and_unmatched_values(props):
     original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(props['original_fieldnames'], 'Original Fieldnames').values()
     write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, props['results_path'])
@@ -198,7 +204,7 @@ while run_script == True:
         'original_path':None,
         'final_path':None,
         'id_fieldname':None}
-    results_path = ''
+    results_path = 'Results'
     print('By default, this script looks at the directory in which it resides. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
     custom_config=true_false_input('Would you like to add your own custom config?')
     continue_read_csv=custom_config['valid_input']
@@ -209,10 +215,7 @@ while run_script == True:
         except Exception as e:
             print(f'There seems to be an error \n{e}\n')
             continue_read_csv=False
-            try_again_input=true_false_input('Would you like to try again?')
-            if try_again_input['valid_input']:
-                run_script=try_again_input['input']
-            else:run_script=False
+            run_script=try_again()
     continue_process_csv=False
     if continue_read_csv:
         csv_results=read_csv_data(read_csv_props)
@@ -223,10 +226,7 @@ while run_script == True:
         comparison_data=extract_duplicate_and_unmatched_values(parsed_csv)
         print(comparison_data)
     else:
-        try_again_input=true_false_input('Would you like to try again?')
-        if try_again_input['valid_input']:
-            run_script=try_again_input['input']
-        else:run_script=False
+        run_script=try_again()
     
 
 

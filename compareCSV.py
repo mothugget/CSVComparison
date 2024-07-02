@@ -118,8 +118,10 @@ def read_csv_data(props):
         if props['final_path']==None:
             props['final_path']='final.csv'
         original_fieldnames = read_fieldnames(props['original_path'])
-        if props['id_fieldname']==None:
+        if props['id_fieldname']==None or '':
             id_fieldname=original_fieldnames[0]
+        else:
+            id_fieldname=props['id_fieldname']
         final_fieldnames = read_fieldnames(props['final_path'])
         original_row_id = read_row_id(props['original_path'], id_fieldname)   
         final_row_id = read_row_id(props['final_path'], id_fieldname)    
@@ -135,13 +137,15 @@ def read_csv_data(props):
         original_data=None
         final_data=None
     return {
-                'continue_script':continue_to_next_function,
-                'original_fieldnames': original_fieldnames,
-                'final_fieldnames': final_fieldnames,
-                'original_row_id': original_row_id,
-                'final_row_id': final_row_id,
-                'original_data': original_data,
-                'final_data': final_data
+                'continue_parse_csv':continue_to_next_function,
+                'parsed_csv':{
+                    'original_fieldnames': original_fieldnames,
+                    'final_fieldnames': final_fieldnames,
+                    'original_row_id': original_row_id,
+                    'final_row_id': final_row_id,
+                    'original_data': original_data,
+                    'final_data': final_data
+                }
             }
 
 def true_false_input(prompt):
@@ -164,7 +168,7 @@ def true_false_input(prompt):
 
 print('Welcome to the CSV comparison script')
 run_script:bool = True
-continue_script=True
+continue_read_csv=True
 while run_script == True:
     read_csv_props = {
         'original_path':None,
@@ -172,20 +176,30 @@ while run_script == True:
         'id_fieldname':None}
     print('By default, this script looks at the directory in which it resides. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
     custom_config=true_false_input('Would you like to add your own custom config?')
-    continue_script=custom_config['valid_input']
-    if continue_script and custom_config['input']:
+    continue_read_csv=custom_config['valid_input']
+    if continue_read_csv and custom_config['input']:
         try:
-            read_csv_props=eval(input("{'original_path': '','final_path': '','id_fieldname':''}\n")).values()
+            read_csv_props=eval(input("{'original_path': '/Users/karlfredriksson/tdcc/original.csv','final_path': '/Users/karlfredriksson/tdcc/final.csv','id_fieldname':'id','results_path':'True/Users/karlfredriksson/tdcc'}\n"))
         except Exception as e:
             print(f'There seems to be an error \n{e}\n')
-            continue_script=False
+            continue_read_csv=False
             try_again_input=true_false_input('Would you like to try again?')
             if try_again_input['valid_input']:
                 run_script=try_again_input['input']
             else:run_script=False
-
-    print(read_csv_data(read_csv_props))
-    run_script=False
+    continue_parse_csv=False
+    if continue_read_csv:
+        csv_results=read_csv_data(read_csv_props)
+    continue_parse_csv=csv_results['continue_parse_csv']
+    parsed_csv=csv_results['parsed_csv']
+    if continue_parse_csv:
+        print(csv_results)
+    else:
+        try_again_input=true_false_input('Would you like to try again?')
+        if try_again_input['valid_input']:
+            run_script=try_again_input['input']
+        else:run_script=False
+    
 
 
 

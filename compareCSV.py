@@ -118,7 +118,7 @@ def read_csv_data(props):
         if props['final_path']==None:
             props['final_path']='final.csv'
         original_fieldnames = read_fieldnames(props['original_path'])
-        if props['id_fieldname']==None or '':
+        if props['id_fieldname']==None:
             id_fieldname=original_fieldnames[0]
         else:
             id_fieldname=props['id_fieldname']
@@ -137,7 +137,7 @@ def read_csv_data(props):
         original_data=None
         final_data=None
     return {
-                'continue_parse_csv':continue_to_next_function,
+                'continue_process_csv':continue_to_next_function,
                 'parsed_csv':{
                     'original_fieldnames': original_fieldnames,
                     'final_fieldnames': final_fieldnames,
@@ -164,6 +164,30 @@ def true_false_input(prompt):
                 return_object =  {'input':None,'valid_input':False}
     return return_object
 
+def extract_duplicate_and_unmatched_values(props):
+    original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(props['original_fieldnames'], 'Original Fieldnames').values()
+    write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, props['results_path'])
+
+    final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(props['final_fieldnames'], 'Final Fieldnames').values()
+    write_list_csv('Final Duplicate Fieldnames', final_duplicate_fieldnames, props['results_path'])
+
+    original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, original_duplicate_fieldnames, final_duplicate_fieldnames, 'fieldnames').values()
+    write_list_csv("Original Unmatched Fieldnames", original_unmatched_fieldnames, props['results_path'])
+    write_list_csv("Final Unmatched Fieldnames", final_unmatched_fieldnames, props['results_path'])
+
+    original_duplicate_row_id, original_unique_row_id = separate_duplicate_values(props['original_row_id'], 'Original Row ID').values()
+    write_list_csv('Original Duplicate Row ID', original_duplicate_row_id, props['results_path'])
+
+    final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(props['final_row_id'], 'Final Row ID').values()
+    write_list_csv('Final Duplicate Row ID', final_duplicate_row_id, props['results_path'])
+
+    original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, original_duplicate_row_id, final_duplicate_row_id, 'row ID').values()
+    write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, props['results_path'])
+    write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, props['results_path'])
+    return {'comparison_fieldnames':comparison_fieldnames,'comparison_row_id':comparison_row_id}
+
+
+
 #Script starts here
 
 print('Welcome to the CSV comparison script')
@@ -174,12 +198,14 @@ while run_script == True:
         'original_path':None,
         'final_path':None,
         'id_fieldname':None}
+    results_path = ''
     print('By default, this script looks at the directory in which it resides. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
     custom_config=true_false_input('Would you like to add your own custom config?')
     continue_read_csv=custom_config['valid_input']
     if continue_read_csv and custom_config['input']:
         try:
-            read_csv_props=eval(input("{'original_path': '/Users/karlfredriksson/tdcc/original.csv','final_path': '/Users/karlfredriksson/tdcc/final.csv','id_fieldname':'id','results_path':'True/Users/karlfredriksson/tdcc'}\n"))
+            read_csv_props=eval(input("{'original_path': '/Users/karlfredriksson/tdcc/original.csv','final_path': '/Users/karlfredriksson/tdcc/final.csv','id_fieldname':'id','results_path':'/Users/karlfredriksson/tdcc'}\n"))
+            results_path=read_csv_props['results_path']
         except Exception as e:
             print(f'There seems to be an error \n{e}\n')
             continue_read_csv=False
@@ -187,13 +213,15 @@ while run_script == True:
             if try_again_input['valid_input']:
                 run_script=try_again_input['input']
             else:run_script=False
-    continue_parse_csv=False
+    continue_process_csv=False
     if continue_read_csv:
         csv_results=read_csv_data(read_csv_props)
-    continue_parse_csv=csv_results['continue_parse_csv']
+    continue_process_csv=csv_results['continue_process_csv']
     parsed_csv=csv_results['parsed_csv']
-    if continue_parse_csv:
-        print(csv_results)
+    parsed_csv['results_path']=results_path
+    if continue_process_csv:
+        comparison_data=extract_duplicate_and_unmatched_values(parsed_csv)
+        print(comparison_data)
     else:
         try_again_input=true_false_input('Would you like to try again?')
         if try_again_input['valid_input']:
@@ -202,27 +230,6 @@ while run_script == True:
     
 
 
-
-
-# original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(original_fieldnames, 'Original Fieldnames').values()
-# write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, results_path)
-
-# final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(final_fieldnames, 'Final Fieldnames').values()
-# write_list_csv('Final Duplicate Fieldnames', final_duplicate_fieldnames, results_path)
-
-# original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, original_duplicate_fieldnames, final_duplicate_fieldnames, 'fieldnames').values()
-# write_list_csv("Original Unmatched Fieldnames, original_unmatched_fieldnames, results_path)
-# write_list_csv("Final Unmatched Fieldnames, final_unmatched_fieldnames, results_path)
-
-# original_duplicate_row_id, original_unique_row_id = separate_duplicate_values(original_row_id, 'Original Row ID').values()
-# write_list_csv('Original Duplicate Row ID', original_duplicate_row_id, results_path)
-
-# final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(final_row_id, 'Final Row ID').values()
-# write_list_csv('Final Duplicate Row ID', final_duplicate_row_id, results_path)
-
-# original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, original_duplicate_row_id, final_duplicate_row_id, 'row ID').values()
-# write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, results_path)
-# write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, results_path)
 
 
 

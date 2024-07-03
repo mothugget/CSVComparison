@@ -69,11 +69,16 @@ def separate_unmatched_values(original, final, original_duplicates, final_duplic
         'comparison': matched
     }
 
-def create_results_folder():
-    result_path = 'Results - ' + str(datetime.datetime.today())[0:19]
-    os.makedirs(result_path)
-    print("Results folder created")
-    return result_path
+def create_results_folder(results_containing_directory_path,original_filepath,final_filepath):
+    try:
+        print('Creating results folder')
+        result_path = results_containing_directory_path+'Results - ('+ original_filepath+ " || " +final_filepath + ") " + str(datetime.datetime.today())[0:19]
+        os.makedirs(result_path)
+        print("Results folder created")
+        return {'continue_process_csv':True,'generated_path':result_path}
+    except  Exception as e:
+        print('Something went wrong'+e) 
+        return {'continue_process_csv':False, 'generated_path':None}
 
 def write_list_csv(title, list, results_path):
     print('Creating ' + title + ' result csv')
@@ -85,17 +90,20 @@ def write_list_csv(title, list, results_path):
     print('Created ' + title + ' result csv')
 
 def comparison_writer(original_data, final_data, comparison_fieldnames, comparison_row_id, results_path):
-    print('Comparing Data')
-    result_fieldnames = comparison_fieldnames[:]
-    result_fieldnames.insert(0, 'Sheet Comparison Row ID')
-    with open(results_path + '/' + 'Sheet Comparison.csv', 'w') as csvfile:
-        csv_writer = csv.DictWriter(csvfile, fieldnames = result_fieldnames)
-        csv_writer.writeheader()
-        for id in comparison_row_id:
-            compared_row = row_comparison(id, original_data, final_data, comparison_fieldnames)
-            if compared_row['differences']:
-                csv_writer.writerow(compared_row['row_object'])
-    print('Finished Comparing Data')
+    try:
+        print('Comparing Data')
+        result_fieldnames = comparison_fieldnames[:]
+        result_fieldnames.insert(0, 'Sheet Comparison Row ID')
+        with open(results_path + '/' + 'Sheet Comparison.csv', 'w') as csvfile:
+            csv_writer = csv.DictWriter(csvfile, fieldnames = result_fieldnames)
+            csv_writer.writeheader()
+            for id in comparison_row_id:
+                compared_row = row_comparison(id, original_data, final_data, comparison_fieldnames)
+                if compared_row['differences']:
+                    csv_writer.writerow(compared_row['row_object'])
+        print('Finished Comparing Data')
+    except Exception as e:
+        print('Something went wronf\n'+e)
 
 def row_comparison(id, original_data, final_data, comparison_fieldnames):
     result = {'differences': False, 'row_object': {}}
@@ -113,10 +121,6 @@ def row_comparison(id, original_data, final_data, comparison_fieldnames):
 def read_csv_data(props):
     continue_to_next_function=True
     try:
-        if props['original_path']==None:
-            props['original_path']='original.csv'
-        if props['final_path']==None:
-            props['final_path']='final.csv'
         original_fieldnames = read_fieldnames(props['original_path'])
         if props['id_fieldname']==None:
             id_fieldname=original_fieldnames[0]
@@ -206,8 +210,8 @@ run_script:bool = True
 continue_read_csv=True
 while run_script == True:
     read_csv_props = {
-        'original_path':None,
-        'final_path':None,
+        'original_path':'original.csv',
+        'final_path':'final.csv',
         'id_fieldname':None}
     results_path = 'Results'
     print('By default, this script looks at the directory in which it resides. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
@@ -226,7 +230,8 @@ while run_script == True:
         csv_results=read_csv_data(read_csv_props)
     continue_process_csv=csv_results['continue_process_csv']
     parsed_csv=csv_results['parsed_csv']
-    parsed_csv['results_path']=results_path
+    generated_results_folder=create_results_folder(results_path,read_csv_props['original_path'],read_csv_props['final_path'])
+    parsed_csv['results_path']=generated_results_folder['generated_path']
     comparison_data={'continue_comparison':False}
     if continue_process_csv:
         comparison_data=extract_duplicate_and_unmatched_values(parsed_csv)

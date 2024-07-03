@@ -171,28 +171,33 @@ def try_again():
     else:return False
 
 def extract_duplicate_and_unmatched_values(props):
-    original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(props['original_fieldnames'], 'Original Fieldnames').values()
-    write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, props['results_path'])
+    continue_comparison = True
+    try:
+        
+        original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(props['original_fieldnames'], 'Original Fieldnames').values()
+        write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, props['results_path'])
 
-    final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(props['final_fieldnames'], 'Final Fieldnames').values()
-    write_list_csv('Final Duplicate Fieldnames', final_duplicate_fieldnames, props['results_path'])
+        final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(props['final_fieldnames'], 'Final Fieldnames').values()
+        write_list_csv('Final Duplicate Fieldnames', final_duplicate_fieldnames, props['results_path'])
 
-    original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, original_duplicate_fieldnames, final_duplicate_fieldnames, 'fieldnames').values()
-    write_list_csv("Original Unmatched Fieldnames", original_unmatched_fieldnames, props['results_path'])
-    write_list_csv("Final Unmatched Fieldnames", final_unmatched_fieldnames, props['results_path'])
+        original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, original_duplicate_fieldnames, final_duplicate_fieldnames, 'fieldnames').values()
+        write_list_csv("Original Unmatched Fieldnames", original_unmatched_fieldnames, props['results_path'])
+        write_list_csv("Final Unmatched Fieldnames", final_unmatched_fieldnames, props['results_path'])
 
-    original_duplicate_row_id, original_unique_row_id = separate_duplicate_values(props['original_row_id'], 'Original Row ID').values()
-    write_list_csv('Original Duplicate Row ID', original_duplicate_row_id, props['results_path'])
+        original_duplicate_row_id, original_unique_row_id = separate_duplicate_values(props['original_row_id'], 'Original Row ID').values()
+        write_list_csv('Original Duplicate Row ID', original_duplicate_row_id, props['results_path'])
 
-    final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(props['final_row_id'], 'Final Row ID').values()
-    write_list_csv('Final Duplicate Row ID', final_duplicate_row_id, props['results_path'])
+        final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(props['final_row_id'], 'Final Row ID').values()
+        write_list_csv('Final Duplicate Row ID', final_duplicate_row_id, props['results_path'])
 
-    original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, original_duplicate_row_id, final_duplicate_row_id, 'row ID').values()
-    write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, props['results_path'])
-    write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, props['results_path'])
-    return {'comparison_fieldnames':comparison_fieldnames,'comparison_row_id':comparison_row_id}
-
-
+        original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, original_duplicate_row_id, final_duplicate_row_id, 'row ID').values()
+        write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, props['results_path'])
+        write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, props['results_path'])
+        return {'continue_comparison':continue_comparison,'comparison_fieldnames':comparison_fieldnames,'comparison_row_id':comparison_row_id}
+    except Exception as e:
+        continue_comparison=False
+        print('Something went wrong\n'+e)
+        return {'continue_comparison':continue_comparison,'comparison_fieldnames':None,'comparison_row_id':None}
 
 #Script starts here
 
@@ -222,15 +227,17 @@ while run_script == True:
     continue_process_csv=csv_results['continue_process_csv']
     parsed_csv=csv_results['parsed_csv']
     parsed_csv['results_path']=results_path
+    comparison_data={'continue_comparison':False}
     if continue_process_csv:
         comparison_data=extract_duplicate_and_unmatched_values(parsed_csv)
-        print(comparison_data)
     else:
         run_script=try_again()
-    
+    if comparison_data['continue_comparison']:
+        comparison_writer(parsed_csv['original_data'], parsed_csv['final_data'], comparison_data['comparison_fieldnames'], comparison_data['comparison_row_id'], results_path)
+        run_script=False
+    else:
+        run_script=try_again()
 
 
 
 
-
-# comparison_writer(original_data, final_data, comparison_fieldnames, comparison_row_id, results_path)

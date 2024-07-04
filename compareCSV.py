@@ -72,7 +72,10 @@ def separate_unmatched_values(original, final, original_duplicates, final_duplic
 def create_results_folder(results_containing_directory_path,original_filepath,final_filepath):
     try:
         print('Creating results folder')
-        result_path = results_containing_directory_path+'Results - ('+ original_filepath+ " || " +final_filepath + ") " + str(datetime.datetime.today())[0:19]
+        slash='/'
+        if  results_containing_directory_path=='/':
+            slash=''
+        result_path = results_containing_directory_path+slash+'Results - ('+ os.path.basename(original_filepath)+ " || " + os.path.basename(final_filepath) + ") " + str(datetime.datetime.today())[0:19]
         os.makedirs(result_path)
         print("Results folder created")
         return {'continue_process_csv':True,'generated_path':result_path}
@@ -94,7 +97,10 @@ def comparison_writer(original_data, final_data, comparison_fieldnames, comparis
         print('Comparing Data')
         result_fieldnames = comparison_fieldnames[:]
         result_fieldnames.insert(0, 'Sheet Comparison Row ID')
-        with open(results_path + '/' + 'Sheet Comparison.csv', 'w') as csvfile:
+        slash = '/'
+        if results_path=="":
+            slash=''
+        with open(results_path + slash + 'Sheet Comparison.csv', 'w') as csvfile:
             csv_writer = csv.DictWriter(csvfile, fieldnames = result_fieldnames)
             csv_writer.writeheader()
             for id in comparison_row_id:
@@ -103,7 +109,7 @@ def comparison_writer(original_data, final_data, comparison_fieldnames, comparis
                     csv_writer.writerow(compared_row['row_object'])
         print('Finished Comparing Data')
     except Exception as e:
-        print('Something went wronf\n'+e)
+        print('Something went wrong\n',e)
 
 def row_comparison(id, original_data, final_data, comparison_fieldnames):
     result = {'differences': False, 'row_object': {}}
@@ -207,14 +213,13 @@ def extract_duplicate_and_unmatched_values(props):
 
 print('Welcome to the CSV comparison script')
 run_script:bool = True
-continue_read_csv=True
 while run_script == True:
     read_csv_props = {
         'original_path':'original.csv',
         'final_path':'final.csv',
         'id_fieldname':None}
-    results_path = 'Results'
-    print('By default, this script looks at the directory in which it resides. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
+    results_path = ''
+    print('By default, this script looks at the current directory. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
     custom_config=true_false_input('Would you like to add your own custom config?')
     continue_read_csv=custom_config['valid_input']
     if continue_read_csv and custom_config['input']:
@@ -225,23 +230,25 @@ while run_script == True:
             print(f'There seems to be an error \n{e}\n')
             continue_read_csv=False
             run_script=try_again()
-    continue_process_csv=False
     if continue_read_csv:
         csv_results=read_csv_data(read_csv_props)
-    continue_process_csv=csv_results['continue_process_csv']
-    parsed_csv=csv_results['parsed_csv']
-    generated_results_folder=create_results_folder(results_path,read_csv_props['original_path'],read_csv_props['final_path'])
-    parsed_csv['results_path']=generated_results_folder['generated_path']
-    comparison_data={'continue_comparison':False}
-    if continue_process_csv:
-        comparison_data=extract_duplicate_and_unmatched_values(parsed_csv)
+        if csv_results['continue_process_csv']:
+            generated_results_folder=create_results_folder(results_path,read_csv_props['original_path'],read_csv_props['final_path'])
+            csv_results['parsed_csv']['results_path']=generated_results_folder['generated_path']
+            if generated_results_folder['continue_process_csv']:
+                comparison_data=extract_duplicate_and_unmatched_values(csv_results['parsed_csv'])
+                if comparison_data['continue_comparison']:
+                    comparison_writer(csv_results['parsed_csv']['original_data'], csv_results['parsed_csv']['final_data'], comparison_data['comparison_fieldnames'], comparison_data['comparison_row_id'], results_path)
+                    run_script=False
+                else:
+                    run_script=try_again()
+            else: 
+                run_script=try_again()
+        else:
+            run_script=try_again()
     else:
-        run_script=try_again()
-    if comparison_data['continue_comparison']:
-        comparison_writer(parsed_csv['original_data'], parsed_csv['final_data'], comparison_data['comparison_fieldnames'], comparison_data['comparison_row_id'], results_path)
         run_script=False
-    else:
-        run_script=try_again()
+
 
 
 

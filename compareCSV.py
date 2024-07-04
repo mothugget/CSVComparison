@@ -1,6 +1,7 @@
 import csv
 import datetime
 import os
+import json
 
 def read_fieldnames(file_path):
     print('Reading ' + file_path + ' fieldnames')
@@ -23,13 +24,13 @@ def read_row_id(file_path, id_fieldname):
     print('Finished reading ' + file_path + ' row IDs')
     return id_list
 
-def parse_data(file_path):
+def parse_data(file_path,id_fieldname):
     print('Parsing ' + file_path + ' data')
     data_dict = {}
     with open(file_path, 'r') as csvdictfile:
         dict_csv_reader = csv.DictReader(csvdictfile)
         for row in dict_csv_reader:
-            data_dict[row['id']] = row
+            data_dict[row[id_fieldname]] = row
     print('Finished parsing ' + file_path + ' data')
     return data_dict
 
@@ -135,8 +136,8 @@ def read_csv_data(props):
         final_fieldnames = read_fieldnames(props['final_path'])
         original_row_id = read_row_id(props['original_path'], id_fieldname)   
         final_row_id = read_row_id(props['final_path'], id_fieldname)    
-        original_data = parse_data(props['original_path'])    
-        final_data = parse_data(props['final_path'])
+        original_data = parse_data(props['original_path'],id_fieldname)    
+        final_data = parse_data(props['final_path'],id_fieldname)
     except Exception as e:
         print(f"Error parsing data: {e}")
         continue_to_next_function=False
@@ -209,9 +210,19 @@ def extract_duplicate_and_unmatched_values(props):
         print('Something went wrong\n'+e)
         return {'continue_comparison':continue_comparison,'comparison_fieldnames':None,'comparison_row_id':None}
 
+def write_json_config_file(config_dict):
+    if not os.path.isfile('CSVComparisonConfig.json'):
+        with open("CSVComparisonConfig.json", "w") as outfile:
+            json.dump(config_dict, outfile)
+
+
 #Script starts here
 
 print('Welcome to the CSV comparison script')
+write_json_config_file({
+        'original_path':'original.csv',
+        'final_path':'final.csv',
+        'id_fieldname':None})
 run_script:bool = True
 while run_script == True:
     read_csv_props = {
@@ -224,7 +235,7 @@ while run_script == True:
     continue_read_csv=custom_config['valid_input']
     if continue_read_csv and custom_config['input']:
         try:
-            read_csv_props=eval(input("{'original_path': '/Users/karlfredriksson/tdcc/original.csv','final_path': '/Users/karlfredriksson/tdcc/final.csv','id_fieldname':'id','results_path':'/Users/karlfredriksson/tdcc'}\n"))
+            read_csv_props=eval(input("{'original_path': '/Users/karlfredriksson/tdcc/original.csv','final_path': '/Users/karlfredriksson/tdcc/final.csv','id_fieldname':'MDM-nummer','results_path':'/Users/karlfredriksson/tdcc'}\n"))
             results_path=read_csv_props['results_path']
         except Exception as e:
             print(f'There seems to be an error \n{e}\n')
@@ -238,7 +249,7 @@ while run_script == True:
             if generated_results_folder['continue_process_csv']:
                 comparison_data=extract_duplicate_and_unmatched_values(csv_results['parsed_csv'])
                 if comparison_data['continue_comparison']:
-                    comparison_writer(csv_results['parsed_csv']['original_data'], csv_results['parsed_csv']['final_data'], comparison_data['comparison_fieldnames'], comparison_data['comparison_row_id'], results_path)
+                    comparison_writer(csv_results['parsed_csv']['original_data'], csv_results['parsed_csv']['final_data'], comparison_data['comparison_fieldnames'], comparison_data['comparison_row_id'], csv_results['parsed_csv']['results_path'])
                     run_script=False
                 else:
                     run_script=try_again()
@@ -248,8 +259,6 @@ while run_script == True:
             run_script=try_again()
     else:
         run_script=False
-
-
 
 
 

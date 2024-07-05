@@ -74,14 +74,14 @@ def create_results_folder(results_containing_directory_path,original_filepath,fi
     try:
         print('Creating results folder')
         slash='/'
-        if  results_containing_directory_path=='/':
+        if  results_containing_directory_path=='' or results_containing_directory_path[-1]=='/':
             slash=''
         result_path = results_containing_directory_path+slash+'Results - ('+ os.path.basename(original_filepath)+ " || " + os.path.basename(final_filepath) + ") " + str(datetime.datetime.today())[0:19]
         os.makedirs(result_path)
         print("Results folder created")
         return {'continue_process_csv':True,'generated_path':result_path}
     except  Exception as e:
-        print('Something went wrong'+e) 
+        print('Something went wrong \n',e) 
         return {'continue_process_csv':False, 'generated_path':None}
 
 def write_list_csv(title, list, results_path):
@@ -215,32 +215,40 @@ def write_json_config_file(config_dict):
         with open("CSVComparisonConfig.json", "w") as outfile:
             json.dump(config_dict, outfile)
 
+def read_json_config_file():
+        with open("CSVComparisonConfig.json", "r") as infile:
+            return json.load(infile)
+
+def is_list_subset(subset, set):
+    missing_values=[x for x in subset if set.count(x)==0]
+    return missing_values==[]
+
 
 #Script starts here
 
+True or print('Does it work?')
+
 print('Welcome to the CSV comparison script')
-write_json_config_file({
-        'original_path':'original.csv',
-        'final_path':'final.csv',
-        'id_fieldname':None})
 run_script:bool = True
 while run_script == True:
-    read_csv_props = {
+    default_config = {
         'original_path':'original.csv',
         'final_path':'final.csv',
-        'id_fieldname':None}
-    results_path = ''
-    print('By default, this script looks at the current directory. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
-    custom_config=true_false_input('Would you like to add your own custom config?')
-    continue_read_csv=custom_config['valid_input']
-    if continue_read_csv and custom_config['input']:
-        try:
-            read_csv_props=eval(input("{'original_path': '/Users/karlfredriksson/tdcc/original.csv','final_path': '/Users/karlfredriksson/tdcc/final.csv','id_fieldname':'MDM-nummer','results_path':'/Users/karlfredriksson/tdcc'}\n"))
-            results_path=read_csv_props['results_path']
-        except Exception as e:
-            print(f'There seems to be an error \n{e}\n')
-            continue_read_csv=False
-            run_script=try_again()
+        'id_fieldname':None,
+        'results_path':''
+        }
+    continue_read_csv=True
+    try:
+        write_json_config_file(default_config)
+        print('By default, this script looks at the current directory. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
+        input('Press enter to continue')
+        read_csv_props = read_json_config_file()
+        results_path = read_csv_props['results_path']
+        if not is_list_subset(list(default_config.values()), list(read_csv_props.values())):
+            raise Exception('Config file is missing keys. To restart from a default config file, delete CSVComparisonConfig.json from the directory in which this script is running.') 
+    except Exception as e:
+        print('Something went wrong\n',e)
+        continue_read_csv=False
     if continue_read_csv:
         csv_results=read_csv_data(read_csv_props)
         if csv_results['continue_process_csv']:
@@ -258,7 +266,7 @@ while run_script == True:
         else:
             run_script=try_again()
     else:
-        run_script=False
+        run_script=try_again()
 
 
 

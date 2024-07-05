@@ -228,8 +228,6 @@ def is_list_subset(subset, set):
 
 #Script starts here
 
-True or print('Does it work?')
-
 print('Welcome to the CSV comparison script')
 run_script:bool = True
 while run_script == True:
@@ -259,7 +257,7 @@ while run_script == True:
             if generated_results_folder['continue_process_csv']:
                 comparison_data=extract_duplicate_and_unmatched_values(csv_results['parsed_csv'])
                 if comparison_data['skipped_categories']!=[]:
-                    print('Some fieldnames/ row ID were duplicates or unmatched, and so will be skipped in the final analysis.\nThese can be found in the results folder, in the following folders:')
+                    print('Some fieldnames/row ID were duplicates or unmatched, and so will be skipped in the final analysis.\nThese can be found in the results folder, in the following folders:')
                     for category in comparison_data['skipped_categories']:
                         print(category)
                     continue_input=true_false_input('Would you like to continue the comparison?')

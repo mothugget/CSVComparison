@@ -3,7 +3,7 @@ import datetime
 import os
 import json
 
-def read_fieldnames(file_path):
+def read_fieldnames(file_path,delimiter,quote_character):
     print('Reading ' + file_path + ' fieldnames')
     fieldnames = []
     with open(file_path, 'r') as csvfile:
@@ -14,7 +14,7 @@ def read_fieldnames(file_path):
     print('Finished reading ' + file_path + ' fieldnames')
     return fieldnames
 
-def read_row_id(file_path, id_fieldname):
+def read_row_id(file_path, id_fieldname,delimiter,quote_character):
     print('Reading ' + file_path + ' row IDs')
     id_list = []
     with open(file_path, 'r') as csvdictfile:
@@ -24,7 +24,7 @@ def read_row_id(file_path, id_fieldname):
     print('Finished reading ' + file_path + ' row IDs')
     return id_list
 
-def parse_data(file_path,id_fieldname):
+def parse_data(file_path,id_fieldname,delimiter,quote_character):
     print('Parsing ' + file_path + ' data')
     data_dict = {}
     with open(file_path, 'r') as csvdictfile:
@@ -128,16 +128,16 @@ def row_comparison(id, original_data, final_data, comparison_fieldnames):
 def read_csv_data(props):
     continue_to_next_function=True
     try:
-        original_fieldnames = read_fieldnames(props['original_path'])
+        original_fieldnames = read_fieldnames(props['original_path'],props['original_delimiter'],props['original_quote_character'])
         if props['id_fieldname']==None:
             id_fieldname=original_fieldnames[0]
         else:
             id_fieldname=props['id_fieldname']
-        final_fieldnames = read_fieldnames(props['final_path'])
-        original_row_id = read_row_id(props['original_path'], id_fieldname)   
-        final_row_id = read_row_id(props['final_path'], id_fieldname)    
-        original_data = parse_data(props['original_path'],id_fieldname)    
-        final_data = parse_data(props['final_path'],id_fieldname)
+        final_fieldnames = read_fieldnames(props['final_path'],props['final_delimiter'],props['final_quote_character'])
+        original_row_id = read_row_id(props['original_path'], id_fieldname,props['original_delimiter'],props['original_quote_character'])   
+        final_row_id = read_row_id(props['final_path'], id_fieldname,props['final_delimiter'],props['final_quote_character'])    
+        original_data = parse_data(props['original_path'],id_fieldname,props['original_delimiter'],props['original_quote_character'])    
+        final_data = parse_data(props['final_path'],id_fieldname,props['final_delimiter'],props['final_quote_character'])
     except Exception as e:
         print(f"Error parsing data: {e}")
         continue_to_next_function=False
@@ -185,6 +185,7 @@ def extract_duplicate_and_unmatched_values(props):
     continue_comparison = True
     skipped_categories=[]
     try:
+
         original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(props['original_fieldnames'], 'Original Fieldnames').values()
         original_duplicate_fieldnames==[] or (skipped_categories.append('Original Duplicate Fieldnames') or write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, props['results_path']))
         
@@ -233,7 +234,11 @@ run_script:bool = True
 while run_script == True:
     default_config = {
         'original_path':'original.csv',
+        'original_delimiter':',',
+        'original_quote_character':'"',
         'final_path':'final.csv',
+        'final_delimiter':',',
+        'final_quote_character':'"',
         'id_fieldname':None,
         'results_path':''
         }

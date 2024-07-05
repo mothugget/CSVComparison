@@ -240,7 +240,7 @@ while run_script == True:
     continue_read_csv=True
     try:
         write_json_config_file(default_config)
-        print('By default, this script looks at the current directory. It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.')
+        print('By default, this script looks at the current directory.\n It compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.\n If you wish to change any of these paths, please see the file CSVComparisonConfig.json\n If no other value is specified, the fieldname of the values used to ID the rows of the CSV file is the first fieldname of the original file.')
         input('Press enter to continue')
         read_csv_props = read_json_config_file()
         results_path = read_csv_props['results_path']

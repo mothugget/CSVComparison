@@ -229,7 +229,7 @@ def is_list_subset(subset, set):
 
 #Script starts here
 
-print('Welcome to the CSV comparison script')
+print('\n\nWelcome to the CSV comparison script\n')
 run_script:bool = True
 while run_script == True:
     default_config = {
@@ -245,8 +245,8 @@ while run_script == True:
     continue_read_csv=True
     try:
         write_json_config_file(default_config)
-        print('By default, this script looks at the directory from which it is being run.\nIt compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.\nIf you wish to change any of these paths, or any other parameters, please see the file CSVComparisonConfig.json\nIf no other value is specified, the fieldname of the values used to ID the rows of the CSV file is the first fieldname of the original file.')
-        input('When ready, press enter to continue')
+        print('By default, this script looks at the directory from which it is being run.\nIt compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.\n\nIf you wish to change any of these paths, or any other parameters, please see the file CSVComparisonConfig.json\nIf no other value is specified, the fieldname of the values used to ID the rows of the CSV file is the first fieldname of the original file.\n')
+        input('When the files and configurations are ready, press enter to continue:')
         read_csv_props = read_json_config_file()
         results_path = read_csv_props['results_path']
         if not is_list_subset(list(default_config.values()), list(read_csv_props.values())):
@@ -262,10 +262,10 @@ while run_script == True:
             if generated_results_folder['continue_process_csv']:
                 comparison_data=extract_duplicate_and_unmatched_values(csv_results['parsed_csv'])
                 if comparison_data['skipped_categories']!=[]:
-                    print('Some fieldnames/row ID were duplicates or unmatched, and so will be skipped in the final analysis.\nThese can be found in the results folder, in the following folders:')
+                    print('\n\tOBSERVE:\nSome fieldnames/row ID were duplicates or unmatched, and so will be skipped in the final analysis.\nThese can be found in the results folder, under the following headings:\n')
                     for category in comparison_data['skipped_categories']:
                         print(category)
-                    continue_input=true_false_input('Would you like to continue the comparison?')
+                    continue_input=true_false_input('\nWould you like to continue the comparison?')
                     if continue_input['valid_input']:
                         comparison_data['continue_comparison']=continue_input['input']
                     else:

@@ -36,12 +36,12 @@ def parse_data(file_path,id_fieldname,custom_delimiter,custom_quote_character):
 
 def separate_duplicate_values(list, type):
     print('Analysing duplicate ' + type)
-    duplicates = []
+    duplicates = {}
     unique = []
     for value in list:
-        if list.count(value) > 1:
-            if duplicates.count(value) == 0:
-                duplicates.append(value)
+        count=list.count(value)
+        if count > 1:
+            duplicates[value]=count
         else:
             unique.append(value)
     print('Finished analysing duplicate ' + type)
@@ -84,13 +84,24 @@ def create_results_folder(results_containing_directory_path,original_filepath,fi
         print('Something went wrong \n',e) 
         return {'continue_process_csv':False, 'generated_path':None}
 
-def write_list_csv(title, list, results_path):
+def write_list_csv(title, write_list, results_path):
     print('Creating ' + title + ' result csv')
-    list.insert(0, title)
+    write_list.insert(0, title)
     with open(results_path + '/' + title + '.csv', 'w') as csvfile:
         csv_writer = csv.writer(csvfile)
-        for value in list:
+        for value in write_list:
             csv_writer.writerow([value])
+    print('Created ' + title + ' result csv')
+
+def write_dict_csv(title, value_title, dict, results_path):
+    print('Creating ' + title + ' result csv')
+    write_list=[[title,value_title]]
+    for key in list(dict.keys()):
+        write_list.append([key,dict[key]])
+    with open(results_path + '/' + title + '.csv', 'w') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        for row in write_list:
+            csv_writer.writerow(row)
     print('Created ' + title + ' result csv')
 
 def comparison_writer(original_data, final_data, comparison_fieldnames, comparison_row_id, results_path):
@@ -187,22 +198,22 @@ def extract_duplicate_and_unmatched_values(props):
     try:
 
         original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(props['original_fieldnames'], 'Original Fieldnames').values()
-        original_duplicate_fieldnames==[] or (skipped_categories.append('Original Duplicate Fieldnames') or write_list_csv('Original Duplicate Fieldnames', original_duplicate_fieldnames, props['results_path']))
+        original_duplicate_fieldnames=={} or (skipped_categories.append('Original Duplicate Fieldnames') or write_dict_csv('Original Duplicate Fieldnames', 'Count',original_duplicate_fieldnames, props['results_path']))
         
         final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(props['final_fieldnames'], 'Final Fieldnames').values()
-        final_duplicate_fieldnames==[] or (skipped_categories.append('Final Duplicate Fieldnames') or write_list_csv('Final Duplicate Fieldnames', final_duplicate_fieldnames, props['results_path']))
+        final_duplicate_fieldnames=={} or (skipped_categories.append('Final Duplicate Fieldnames') or write_dict_csv('Final Duplicate Fieldnames', 'Count', final_duplicate_fieldnames, props['results_path']))
         
-        original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, original_duplicate_fieldnames, final_duplicate_fieldnames, 'fieldnames').values()
+        original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, list(original_duplicate_fieldnames.keys()), list(final_duplicate_fieldnames.keys()), 'fieldnames').values()
         original_unmatched_fieldnames==[] or (skipped_categories.append('Original Unmatched Fieldnames') or write_list_csv("Original Unmatched Fieldnames", original_unmatched_fieldnames, props['results_path']))
         final_unmatched_fieldnames==[] or (skipped_categories.append('Final Unmatched Fieldnames') or write_list_csv("Final Unmatched Fieldnames", final_unmatched_fieldnames, props['results_path']))
 
         original_duplicate_row_id, original_unique_row_id = separate_duplicate_values(props['original_row_id'], 'Original Row ID').values()
-        original_duplicate_row_id==[] or (skipped_categories.append('Original Duplicate Row ID') or write_list_csv('Original Duplicate Row ID', original_duplicate_row_id, props['results_path']))
+        original_duplicate_row_id=={} or (skipped_categories.append('Original Duplicate Row ID') or write_dict_csv('Original Duplicate Row ID', 'Count', original_duplicate_row_id, props['results_path']))
         
         final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(props['final_row_id'], 'Final Row ID').values()
-        final_duplicate_row_id==[] or (skipped_categories.append('Final Duplicate Row ID') or write_list_csv('Final Duplicate Row ID', final_duplicate_row_id, props['results_path']))
+        final_duplicate_row_id=={} or (skipped_categories.append('Final Duplicate Row ID') or write_dict_csv('Final Duplicate Row ID', 'Count', final_duplicate_row_id, props['results_path']))
         
-        original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, original_duplicate_row_id, final_duplicate_row_id, 'row ID').values()
+        original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, list(original_duplicate_row_id.keys()), list(final_duplicate_row_id.keys()), 'row ID').values()
         original_unmatched_row_id==[] or (skipped_categories.append('Original Unmatched Row ID') or write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, props['results_path']))
         final_unmatched_row_id==[] or (skipped_categories.append('Final Unmatched Row ID') or write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, props['results_path']))
         
@@ -210,7 +221,7 @@ def extract_duplicate_and_unmatched_values(props):
     
     except Exception as e:
         continue_comparison=False
-        print('Something went wrong\n'+e)
+        print('Something went wrong\n',e)
         return {'continue_comparison':continue_comparison,'comparison_fieldnames':None,'comparison_row_id':None}
 
 def write_json_config_file(config_dict):
@@ -249,7 +260,7 @@ while run_script == True:
         input('When the files and configurations are ready, press enter to continue:')
         read_csv_props = read_json_config_file()
         results_path = read_csv_props['results_path']
-        if not is_list_subset(list(default_config.values()), list(read_csv_props.values())):
+        if not is_list_subset(list(default_config.keys()), list(read_csv_props.keys())):
             raise Exception('Config file is missing keys. To restart from a default config file, delete CSVComparisonConfig.json from the directory in which this script is running.') 
     except Exception as e:
         print('Something went wrong\n',e)

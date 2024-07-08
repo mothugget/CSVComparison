@@ -229,6 +229,10 @@ def write_json_config_file(config_dict):
         with open("CSVComparisonConfig.json", "w") as outfile:
             json.dump(config_dict, outfile)
 
+def write_json_config_results_file(config_dict,results_path):
+    with open(results_path+"/UsedCSVComparisonConfig.json", "w") as outfile:
+        json.dump(config_dict, outfile)
+
 def read_json_config_file():
         with open("CSVComparisonConfig.json", "r") as infile:
             return json.load(infile)
@@ -270,6 +274,7 @@ while run_script == True:
         if csv_results['continue_process_csv']:
             generated_results_folder=create_results_folder(results_path,read_csv_props['original_path'],read_csv_props['final_path'])
             csv_results['parsed_csv']['results_path']=generated_results_folder['generated_path']
+            write_json_config_results_file(read_csv_props,generated_results_folder['generated_path'])
             if generated_results_folder['continue_process_csv']:
                 comparison_data=extract_duplicate_and_unmatched_values(csv_results['parsed_csv'])
                 if comparison_data['skipped_categories']!=[]:

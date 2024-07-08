@@ -3,32 +3,32 @@ import datetime
 import os
 import json
 
-def read_fieldnames(file_path,delimiter,quote_character):
+def read_fieldnames(file_path,custom_delimiter,custom_quote_character):
     print('Reading ' + file_path + ' fieldnames')
     fieldnames = []
     with open(file_path, 'r') as csvfile:
-        csv_reader = csv.reader(csvfile)
+        csv_reader = csv.reader(csvfile,delimiter=custom_delimiter, quotechar=custom_quote_character)
         for row in csv_reader:
             fieldnames = row
             break
     print('Finished reading ' + file_path + ' fieldnames')
     return fieldnames
 
-def read_row_id(file_path, id_fieldname,delimiter,quote_character):
+def read_row_id(file_path, id_fieldname,custom_delimiter,custom_quote_character):
     print('Reading ' + file_path + ' row IDs')
     id_list = []
     with open(file_path, 'r') as csvdictfile:
-        dict_csv_reader = csv.DictReader(csvdictfile)
+        dict_csv_reader = csv.DictReader(csvdictfile,delimiter=custom_delimiter, quotechar=custom_quote_character)
         for row in dict_csv_reader:
             id_list.append(row[id_fieldname])
     print('Finished reading ' + file_path + ' row IDs')
     return id_list
 
-def parse_data(file_path,id_fieldname,delimiter,quote_character):
+def parse_data(file_path,id_fieldname,custom_delimiter,custom_quote_character):
     print('Parsing ' + file_path + ' data')
     data_dict = {}
     with open(file_path, 'r') as csvdictfile:
-        dict_csv_reader = csv.DictReader(csvdictfile)
+        dict_csv_reader = csv.DictReader(csvdictfile,delimiter=custom_delimiter, quotechar=custom_quote_character)
         for row in dict_csv_reader:
             data_dict[row[id_fieldname]] = row
     print('Finished parsing ' + file_path + ' data')

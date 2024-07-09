@@ -193,7 +193,6 @@ def try_again():
     else:return False
 
 def extract_duplicate_and_unmatched_values(props):
-    continue_comparison = True
     skipped_categories=[]
     try:
 
@@ -217,12 +216,11 @@ def extract_duplicate_and_unmatched_values(props):
         original_unmatched_row_id==[] or (skipped_categories.append('Original Unmatched Row ID') or write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, props['results_path']))
         final_unmatched_row_id==[] or (skipped_categories.append('Final Unmatched Row ID') or write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, props['results_path']))
         
-        return {'continue_comparison':continue_comparison,'comparison_fieldnames':comparison_fieldnames,'comparison_row_id':comparison_row_id, 'skipped_categories':skipped_categories}
+        return {'continue_comparison':True,'comparison_fieldnames':comparison_fieldnames,'comparison_row_id':comparison_row_id, 'skipped_categories':skipped_categories}
     
     except Exception as e:
-        continue_comparison=False
         print('Something went wrong\n',e)
-        return {'continue_comparison':continue_comparison,'comparison_fieldnames':None,'comparison_row_id':None}
+        return {'continue_comparison':False,'comparison_fieldnames':None,'comparison_row_id':None,'skipped_categories':skipped_categories}
 
 def write_json_config_file(config_dict):
     if not os.path.isfile('CSVComparisonConfig.json'):
@@ -277,7 +275,9 @@ while run_script == True:
             write_json_config_results_file(read_csv_props,generated_results_folder['generated_path'])
             if generated_results_folder['continue_process_csv']:
                 comparison_data=extract_duplicate_and_unmatched_values(csv_results['parsed_csv'])
-                if comparison_data['skipped_categories']!=[]:
+                if comparison_data['continue_comparison']==False:
+                    run_script=try_again()
+                elif comparison_data['skipped_categories']!=[]:
                     print('\n\tOBSERVE:\nFieldnames and rod ID need to be unique and present on both sheets in order to compare the data.\nSome fieldnames/row ID were duplicates or unmatched, and so the corresponding rows/columns will be skipped in the final analysis.\nThese can be found in the results folder, under the following headings:\n')
                     for category in comparison_data['skipped_categories']:
                         print(category)
@@ -290,7 +290,7 @@ while run_script == True:
                     comparison_writer(csv_results['parsed_csv']['original_data'], csv_results['parsed_csv']['final_data'], comparison_data['comparison_fieldnames'], comparison_data['comparison_row_id'], csv_results['parsed_csv']['results_path'])
                     run_script=False
                 else:
-                    run_script=try_again()
+                    run_script=False
             else: 
                 run_script=try_again()
         else:

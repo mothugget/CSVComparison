@@ -318,6 +318,7 @@ while run_script == True:
                     print('\n\tOBSERVE:\nFieldnames and row ID need to be unique and present on both sheets in order to compare the data.\nSome fieldnames/row ID were duplicates or unmatched, and so the corresponding rows/columns will be skipped in the final analysis.\nThese can be found in the results folder, under the following headings:\n')
                     for category in comparison_data['skipped_categories']:
                         print(category)
+                    print('\nPlease verify the contents of these files as this data will not be part of the final comparison.')
                     continue_input=true_false_input('\nWould you like to continue the comparison?')
                     if continue_input['valid_input']:
                         comparison_data['continue_comparison']=continue_input['input']

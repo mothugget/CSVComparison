@@ -5,6 +5,6 @@
   "final_path": "final.csv",
   "final_delimiter": ",",
   "final_quote_character": "\"",
-  "id_fieldname": null,
+  "id_fieldname": "null",
   "results_path": ""
 }

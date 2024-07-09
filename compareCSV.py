@@ -140,17 +140,14 @@ def read_csv_data(props):
     continue_to_next_function=True
     try:
         original_fieldnames = read_fieldnames(props['original_path'],props['original_delimiter'],props['original_quote_character'])
-        if props['id_fieldname']==None:
-            id_fieldname=original_fieldnames[0]
-        else:
-            id_fieldname=props['id_fieldname']
         final_fieldnames = read_fieldnames(props['final_path'],props['final_delimiter'],props['final_quote_character'])
+        id_fieldname=find_unique_matched_id_fieldname(props['id_fieldname'], original_fieldnames, final_fieldnames)
         original_row_id = read_row_id(props['original_path'], id_fieldname,props['original_delimiter'],props['original_quote_character'])   
         final_row_id = read_row_id(props['final_path'], id_fieldname,props['final_delimiter'],props['final_quote_character'])    
         original_data = parse_data(props['original_path'],id_fieldname,props['original_delimiter'],props['original_quote_character'])    
         final_data = parse_data(props['final_path'],id_fieldname,props['final_delimiter'],props['final_quote_character'])
     except Exception as e:
-        print(f"Error parsing data: {e}")
+        print("\nError parsing data:",e)
         continue_to_next_function=False
         original_fieldnames=None
         final_fieldnames=None
@@ -187,7 +184,7 @@ def true_false_input(prompt):
     return return_object
 
 def try_again():
-    try_again_input=true_false_input('Would you like to run the script again?')
+    try_again_input=true_false_input('\nWould you like to run the script again?')
     if try_again_input['valid_input']:
         return try_again_input['input']
     else:return False
@@ -239,6 +236,35 @@ def is_list_subset(subset, set):
     missing_values=[x for x in subset if set.count(x)==0]
     return missing_values==[]
 
+def is_element_duplicate_or_unmatched(element,original_list,final_list):
+    original_count=original_list.count(element)
+    final_count=final_list.count(element)
+    result={'duplicate_or_unmatched':False,'message':[]}
+    if original_count>1:
+        result['duplicate_or_unmatched']=True
+        result['message'].append('Duplicate in the original data')
+    if original_count<1:
+        result['duplicate_or_unmatched']=True
+        result['message'].append('Unmatched in the original data')
+    if final_count>1:
+        result['duplicate_or_unmatched']=True
+        result['message'].append('Duplicate in the final data')
+    if final_count<1:
+        result['duplicate_or_unmatched']=True
+        result['message'].append('Unmatched in the final data')
+    return result
+
+def find_unique_matched_id_fieldname(proposed_id_fieldname,original_fieldname_list,final_fieldname_list):
+    if proposed_id_fieldname==None:
+        for value in original_fieldname_list:
+            if original_fieldname_list.count(value)==1 and final_fieldname_list.count(value)==1:
+                return value
+        raise Exception('No fieldname could be found which is both unique and matched in both the original and final data.')
+    result=is_element_duplicate_or_unmatched(proposed_id_fieldname,original_fieldname_list,final_fieldname_list)
+    if result['duplicate_or_unmatched']:
+        raise Exception('The specified fieldname was rejected for the following reasons:\n\n'+'\n'.join(result['message']))
+    return proposed_id_fieldname
+
 
 #Script starts here
 
@@ -278,7 +304,7 @@ while run_script == True:
                 if comparison_data['continue_comparison']==False:
                     run_script=try_again()
                 elif comparison_data['skipped_categories']!=[]:
-                    print('\n\tOBSERVE:\nFieldnames and rod ID need to be unique and present on both sheets in order to compare the data.\nSome fieldnames/row ID were duplicates or unmatched, and so the corresponding rows/columns will be skipped in the final analysis.\nThese can be found in the results folder, under the following headings:\n')
+                    print('\n\tOBSERVE:\nFieldnames and row ID need to be unique and present on both sheets in order to compare the data.\nSome fieldnames/row ID were duplicates or unmatched, and so the corresponding rows/columns will be skipped in the final analysis.\nThese can be found in the results folder, under the following headings:\n')
                     for category in comparison_data['skipped_categories']:
                         print(category)
                     continue_input=true_false_input('\nWould you like to continue the comparison?')

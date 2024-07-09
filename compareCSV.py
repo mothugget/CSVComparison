@@ -298,9 +298,9 @@ while run_script == True:
         print('By default, this script looks at the directory in which it is being run.\nIt compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.\n\nIf you wish to change any of these paths, or any other parameters, please see the file CSVComparisonConfig.json\nThe fieldnames are taken from the first row of the .csv files.\nIf no other value is specified, the fieldname of the values used to ID the rows of the CSV file is the first fieldname of the original file.\n')
         input('When the files and configurations are ready, press enter to continue:')
         read_csv_props = read_json_config_file()
-        results_path = read_csv_props['results_path']
         if not is_list_subset(list(default_config.keys()), list(read_csv_props.keys())):
             raise Exception('Config file is missing keys. To restart from a default config file, delete CSVComparisonConfig.json from the directory in which this script is running.') 
+        results_path = read_csv_props['results_path']
     except Exception as e:
         print('Something went wrong\n',e)
         continue_read_csv=False

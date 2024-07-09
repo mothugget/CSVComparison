@@ -2,6 +2,7 @@ import csv
 import datetime
 import os
 import json
+import time
 
 def read_fieldnames(file_path,custom_delimiter,custom_quote_character):
     print('Reading ' + file_path + ' fieldnames')
@@ -35,6 +36,7 @@ def parse_data(file_path,id_fieldname,custom_delimiter,custom_quote_character):
     return data_dict
 
 def separate_duplicate_values(list, type):
+    start=time.time()
     print('Analysing duplicate ' + type)
     duplicates = {}
     unique = []
@@ -45,13 +47,32 @@ def separate_duplicate_values(list, type):
         else:
             unique.append(value)
     print('Finished analysing duplicate ' + type)
+    print('Finished in\n\n', time.time()-start,'\n')
+    return {'duplicates': duplicates, 'unique': unique}
+
+def improved_separate_duplicate_values(list, type):
+    start=time.time()
+    print('Analysing duplicate ' + type)
+    duplicates = {}
+    unique = {}
+    for value in list:
+        if value in duplicates:
+            duplicates[value]+=1
+        elif value in unique:
+            del unique[value]
+            duplicates[value]=2
+        else:
+            unique[value]=True
+    print('Finished analysing duplicate ' + type)
+    print('Finished in\n\n', time.time()-start,'\n')
     return {'duplicates': duplicates, 'unique': unique}
 
 def separate_unmatched_values(original, final, original_duplicates, final_duplicates, type):
+    start=time.time()
     print('Analysing unmatched ' + type)
     matched = []
     original_unmatched = []
-    final_unmatched = final[:]
+    final_unmatched = list(final.values())[:]
 
     for name in original:
         if final_duplicates.count(name) == 0:
@@ -64,6 +85,7 @@ def separate_unmatched_values(original, final, original_duplicates, final_duplic
     final_unmatched = [name for name in final_unmatched if original_duplicates.count(name) == 0]
 
     print('Finished analysing unmatched ' + type)
+    print('Finished in\n\n', time.time()-start,'\n')
     return {
         'original_unmatched': original_unmatched,
         'final_unmatched': final_unmatched,
@@ -193,20 +215,20 @@ def extract_duplicate_and_unmatched_values(props):
     skipped_categories=[]
     try:
 
-        original_duplicate_fieldnames, original_unique_fieldnames = separate_duplicate_values(props['original_fieldnames'], 'Original Fieldnames').values()
+        original_duplicate_fieldnames, original_unique_fieldnames = improved_separate_duplicate_values(props['original_fieldnames'], 'Original Fieldnames').values()
         original_duplicate_fieldnames=={} or (skipped_categories.append('Original Duplicate Fieldnames') or write_dict_csv('Original Duplicate Fieldnames', 'Count',original_duplicate_fieldnames, props['results_path']))
         
-        final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(props['final_fieldnames'], 'Final Fieldnames').values()
+        final_duplicate_fieldnames, final_unique_fieldnames = improved_separate_duplicate_values(props['final_fieldnames'], 'Final Fieldnames').values()
         final_duplicate_fieldnames=={} or (skipped_categories.append('Final Duplicate Fieldnames') or write_dict_csv('Final Duplicate Fieldnames', 'Count', final_duplicate_fieldnames, props['results_path']))
         
         original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, list(original_duplicate_fieldnames.keys()), list(final_duplicate_fieldnames.keys()), 'fieldnames').values()
         original_unmatched_fieldnames==[] or (skipped_categories.append('Original Unmatched Fieldnames') or write_list_csv("Original Unmatched Fieldnames", original_unmatched_fieldnames, props['results_path']))
         final_unmatched_fieldnames==[] or (skipped_categories.append('Final Unmatched Fieldnames') or write_list_csv("Final Unmatched Fieldnames", final_unmatched_fieldnames, props['results_path']))
 
-        original_duplicate_row_id, original_unique_row_id = separate_duplicate_values(props['original_row_id'], 'Original Row ID').values()
+        original_duplicate_row_id, original_unique_row_id = improved_separate_duplicate_values(props['original_row_id'], 'Original Row ID').values()
         original_duplicate_row_id=={} or (skipped_categories.append('Original Duplicate Row ID') or write_dict_csv('Original Duplicate Row ID', 'Count', original_duplicate_row_id, props['results_path']))
         
-        final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(props['final_row_id'], 'Final Row ID').values()
+        final_duplicate_row_id, final_unique_row_id = improved_separate_duplicate_values(props['final_row_id'], 'Final Row ID').values()
         final_duplicate_row_id=={} or (skipped_categories.append('Final Duplicate Row ID') or write_dict_csv('Final Duplicate Row ID', 'Count', final_duplicate_row_id, props['results_path']))
         
         original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, list(original_duplicate_row_id.keys()), list(final_duplicate_row_id.keys()), 'row ID').values()

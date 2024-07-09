@@ -59,23 +59,23 @@ def separate_unmatched_values(original, final, original_duplicates, final_duplic
     original_unmatched = []
     final_unmatched = final.copy()
 
-    for value in list(original.values()):
-        if value in final:
-            matched.append(value)
-            del final_unmatched[value]
+    for key in list(original.keys()):
+        if key in final:
+            matched.append(key)
+            del final_unmatched[key]
         else:
-            original_unmatched.append(value)
+            original_unmatched.append(key)
 
-    for value in list(final_unmatched.values()):
-        if value in original_duplicates:
-            del final_unmatched[value]
+    for key in list(final_unmatched.keys()):
+        if key in original_duplicates:
+            del final_unmatched[key]
   
 
     print('Finished analysing unmatched ' + type)
     print('Finished in\n\n', time.time()-start,'\n')
     return {
         'original_unmatched': original_unmatched,
-        'final_unmatched': list(final_unmatched.values()),
+        'final_unmatched': list(final_unmatched.keys()),
         'comparison': matched
     }
 
@@ -115,6 +115,7 @@ def write_dict_csv(title, value_title, dict, results_path):
 
 def comparison_writer(original_data, final_data, comparison_fieldnames, comparison_row_id, results_path):
     try:
+        start=time.time()
         print('Comparing Data')
         result_fieldnames = comparison_fieldnames[:]
         result_fieldnames.insert(0, 'Sheet Comparison Row ID')
@@ -129,6 +130,7 @@ def comparison_writer(original_data, final_data, comparison_fieldnames, comparis
                 if compared_row['differences']:
                     csv_writer.writerow(compared_row['row_object'])
         print('Finished Comparing Data')
+        print('Finished in\n\n', time.time()-start,'\n')
     except Exception as e:
         print('Something went wrong\n',e)
 

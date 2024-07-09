@@ -1,10 +1,10 @@
 {
-  "original_path": "/Users/karlfredriksson/Downloads/compareHHTenants/ProdArticle.csv",
+  "original_path": "/Users/karlfredriksson/Downloads/Karl/original_4.csv",
   "original_delimiter": ",",
   "original_quote_character": "\"",
-  "final_path": "/Users/karlfredriksson/Downloads/compareHHTenants/dsArticles.csv",
+  "final_path": "/Users/karlfredriksson/Downloads/Karl/final_3.csv",
   "final_delimiter": ",",
   "final_quote_character": "\"",
-  "id_fieldname": "MDM-nummer",
+  "id_fieldname": "id",
   "results_path": ""
 }

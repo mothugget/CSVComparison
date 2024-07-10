@@ -51,7 +51,7 @@ def separate_duplicate_values(list, type):
     print('\nFinished analysing duplicate ' + type+' in', time.time()-start,'seconds\n')
     return {'duplicates': duplicates, 'unique': unique}
 
-def separate_unmatched_values(original, final, original_duplicates, final_duplicates, type):
+def separate_unmatched_values(original, final, original_duplicates, type):
     start=time.time()
     print('Analysing unmatched ' + type)
     matched = []
@@ -80,10 +80,7 @@ def separate_unmatched_values(original, final, original_duplicates, final_duplic
 def create_results_folder(results_containing_directory_path,original_filepath,final_filepath):
     try:
         print('Creating results folder')
-        slash='/'
-        if  results_containing_directory_path=='' or results_containing_directory_path[-1]=='/':
-            slash=''
-        result_path = results_containing_directory_path+slash+'Results - ('+ os.path.basename(original_filepath)+ " || " + os.path.basename(final_filepath) + ") " + str(datetime.datetime.today())[0:19]
+        result_path = os.path.join(results_containing_directory_path,'Results - ('+ os.path.basename(original_filepath)+ " || " + os.path.basename(final_filepath) + ") " + str(datetime.datetime.today())[0:19])
         os.makedirs(result_path)
         print("Results folder created")
         return {'continue_process_csv':True,'generated_path':result_path}
@@ -94,7 +91,7 @@ def create_results_folder(results_containing_directory_path,original_filepath,fi
 def write_list_csv(title, write_list, results_path):
     print('Creating ' + title + ' result csv')
     write_list.insert(0, title)
-    with open(results_path + '/' + title + '.csv', 'w') as csvfile:
+    with open(os.path.join(results_path, title + '.csv'), 'w') as csvfile:
         csv_writer = csv.writer(csvfile)
         for value in write_list:
             csv_writer.writerow([value])
@@ -105,7 +102,7 @@ def write_dict_csv(title, value_title, dict, results_path):
     write_list=[[title,value_title]]
     for key in list(dict.keys()):
         write_list.append([key,dict[key]])
-    with open(results_path + '/' + title + '.csv', 'w') as csvfile:
+    with open(os.path.join(results_path,title+'.csv'), 'w') as csvfile:
         csv_writer = csv.writer(csvfile)
         for row in write_list:
             csv_writer.writerow(row)
@@ -117,10 +114,8 @@ def comparison_writer(original_data, final_data, comparison_fieldnames, comparis
         print('Comparing Data')
         result_fieldnames = comparison_fieldnames[:]
         result_fieldnames.insert(0, 'Sheet Comparison Row ID')
-        slash = '/'
-        if results_path=="":
-            slash=''
-        with open(results_path + slash + 'Sheet Comparison.csv', 'w') as csvfile:
+
+        with open(os.path.join(results_path,'Sheet Comparison.csv'), 'w') as csvfile:
             csv_writer = csv.DictWriter(csvfile, fieldnames = result_fieldnames)
             csv_writer.writeheader()
             for id in comparison_row_id:
@@ -129,7 +124,7 @@ def comparison_writer(original_data, final_data, comparison_fieldnames, comparis
                     csv_writer.writerow(compared_row['row_object'])
         print('\nFinished Comparing Data in\n\n', time.time()-start,'seconds\n')
     except Exception as e:
-        print('Something went wrong\n',e)
+        print('\nSomething went wrong\n',e)
 
 def row_comparison(id, original_data, final_data, comparison_fieldnames):
     result = {'differences': False, 'row_object': {}}
@@ -185,7 +180,7 @@ def true_false_input(prompt):
             try_again=False
             return_object = {'input':input_value,'valid_input':True}
         except Exception as e:
-            print(f"Sorry, didn't quite catch that. Remember answers are case sensitive \n {e}\n")
+            print("\nSorry, didn't quite catch that. Remember answers are case sensitive \n", e,"\n")
             if try_counter==3:
                 print("You've tried this three times now. I'm giving up on you.")
                 return_object =  {'input':None,'valid_input':False}
@@ -207,7 +202,7 @@ def extract_duplicate_and_unmatched_values(props):
         final_duplicate_fieldnames, final_unique_fieldnames = separate_duplicate_values(props['final_fieldnames'], 'Final Fieldnames').values()
         final_duplicate_fieldnames=={} or (skipped_categories.append('Final Duplicate Fieldnames') or write_dict_csv('Final Duplicate Fieldnames', 'Count', final_duplicate_fieldnames, props['results_path']))
         
-        original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, list(original_duplicate_fieldnames.keys()), list(final_duplicate_fieldnames.keys()), 'fieldnames').values()
+        original_unmatched_fieldnames, final_unmatched_fieldnames, comparison_fieldnames = separate_unmatched_values(original_unique_fieldnames, final_unique_fieldnames, list(original_duplicate_fieldnames.keys()), 'fieldnames').values()
         original_unmatched_fieldnames==[] or (skipped_categories.append('Original Unmatched Fieldnames') or write_list_csv("Original Unmatched Fieldnames", original_unmatched_fieldnames, props['results_path']))
         final_unmatched_fieldnames==[] or (skipped_categories.append('Final Unmatched Fieldnames') or write_list_csv("Final Unmatched Fieldnames", final_unmatched_fieldnames, props['results_path']))
 
@@ -217,14 +212,14 @@ def extract_duplicate_and_unmatched_values(props):
         final_duplicate_row_id, final_unique_row_id = separate_duplicate_values(props['final_row_id'], 'Final Row ID').values()
         final_duplicate_row_id=={} or (skipped_categories.append('Final Duplicate Row ID') or write_dict_csv('Final Duplicate Row ID', 'Count', final_duplicate_row_id, props['results_path']))
         
-        original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, list(original_duplicate_row_id.keys()), list(final_duplicate_row_id.keys()), 'row ID').values()
+        original_unmatched_row_id, final_unmatched_row_id, comparison_row_id = separate_unmatched_values(original_unique_row_id, final_unique_row_id, list(original_duplicate_row_id.keys()), 'row ID').values()
         original_unmatched_row_id==[] or (skipped_categories.append('Original Unmatched Row ID') or write_list_csv("Original Unmatched Row ID", original_unmatched_row_id, props['results_path']))
         final_unmatched_row_id==[] or (skipped_categories.append('Final Unmatched Row ID') or write_list_csv("Final Unmatched Row ID", final_unmatched_row_id, props['results_path']))
         
         return {'continue_comparison':True,'comparison_fieldnames':comparison_fieldnames,'comparison_row_id':comparison_row_id, 'skipped_categories':skipped_categories}
     
     except Exception as e:
-        print('Something went wrong\n',e)
+        print('\nSomething went wrong\n',e)
         return {'continue_comparison':False,'comparison_fieldnames':None,'comparison_row_id':None,'skipped_categories':skipped_categories}
 
 def write_json_config_file(config_dict):
@@ -233,7 +228,7 @@ def write_json_config_file(config_dict):
             json.dump(config_dict, outfile)
 
 def write_json_config_results_file(config_dict,results_path):
-    with open(results_path+"/UsedCSVComparisonConfig.json", "w") as outfile:
+    with open(os.path.join(results_path,"UsedCSVComparisonConfig.json"), "w") as outfile:
         json.dump(config_dict, outfile)
 
 def read_json_config_file():
@@ -299,7 +294,7 @@ while run_script == True:
             raise Exception('Config file is missing keys. To restart from a default config file, delete CSVComparisonConfig.json from the directory in which this script is running.') 
         results_path = read_csv_props['results_path']
     except Exception as e:
-        print('Something went wrong\n',e)
+        print('\nSomething went wrong\n',e)
         continue_read_csv=False
     if continue_read_csv:
         csv_results=read_csv_data(read_csv_props)

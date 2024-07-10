@@ -48,8 +48,7 @@ def separate_duplicate_values(list, type):
             duplicates[value]=2
         else:
             unique[value]=True
-    print('Finished analysing duplicate ' + type)
-    print('Finished in\n\n', time.time()-start,'\n')
+    print('\nFinished analysing duplicate ' + type+' in', time.time()-start,'seconds\n')
     return {'duplicates': duplicates, 'unique': unique}
 
 def separate_unmatched_values(original, final, original_duplicates, final_duplicates, type):
@@ -71,8 +70,7 @@ def separate_unmatched_values(original, final, original_duplicates, final_duplic
             del final_unmatched[key]
   
 
-    print('Finished analysing unmatched ' + type)
-    print('Finished in\n\n', time.time()-start,'\n')
+    print('\nFinished analysing unmatched ' + type+' in', time.time()-start,'seconds\n')
     return {
         'original_unmatched': original_unmatched,
         'final_unmatched': list(final_unmatched.keys()),
@@ -129,8 +127,7 @@ def comparison_writer(original_data, final_data, comparison_fieldnames, comparis
                 compared_row = row_comparison(id, original_data, final_data, comparison_fieldnames)
                 if compared_row['differences']:
                     csv_writer.writerow(compared_row['row_object'])
-        print('Finished Comparing Data')
-        print('Finished in\n\n', time.time()-start,'\n')
+        print('\nFinished Comparing Data in\n\n', time.time()-start,'seconds\n')
     except Exception as e:
         print('Something went wrong\n',e)
 

@@ -71,10 +71,11 @@ def separate_unmatched_values(original_unique, final_unique, original_duplicates
             original_unmatched.append(key)
 
     for key in list(original_duplicates.keys()):
-        if key not in final_unique:
-            original_unmatched.append(key)
-        else:
+        if key in final_unique or key in final_duplicates:
             del final_unmatched[key]
+        else:
+            original_unmatched.append(key)
+            
         
 
 

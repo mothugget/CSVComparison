@@ -194,8 +194,7 @@ def yes_no_input(prompt):
             print("\nSorry, didn't quite catch that. \n", e,"\n")
             if try_counter==3:
                 print("You've tried this three times now. I'm giving up on you.\n")
-                return {'input':None,'valid_input':False}
-    
+                return {'input':None,'valid_input':False}   
 
 def yes_no_parser(input_string):
     capitalised_input_string=input_string.upper()
@@ -300,22 +299,21 @@ def find_unique_matched_id_fieldname(proposed_id_fieldname,original_fieldname_li
         raise Exception('The specified fieldname was rejected for the following reasons:\n\n'+'\n'.join(result['message']))
     return proposed_id_fieldname
 
-
 #Script starts here
 
 print('\n\nWelcome to the CSV comparison script\n')
 run_script:bool = True
+default_config = {
+    'original_path':'original.csv',
+    'original_delimiter':',',
+    'original_quote_character':'"',
+    'final_path':'final.csv',
+    'final_delimiter':',',
+    'final_quote_character':'"',
+    'id_fieldname':None,
+    'results_path':''
+    }
 while run_script == True:
-    default_config = {
-        'original_path':'original.csv',
-        'original_delimiter':',',
-        'original_quote_character':'"',
-        'final_path':'final.csv',
-        'final_delimiter':',',
-        'final_quote_character':'"',
-        'id_fieldname':None,
-        'results_path':''
-        }
     continue_read_csv=True
     try:
         write_json_config_file(default_config)

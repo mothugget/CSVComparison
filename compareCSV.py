@@ -179,24 +179,47 @@ def read_csv_data(props):
                 }
             }
 
-def true_false_input(prompt):
+def yes_no_input(prompt):
     try_again=True
     try_counter=0
     while try_again==True and try_counter<3:
         try_counter+=1
         try:
-            input_value:bool=eval(input(prompt+'\n(True/False)'))
+            input_value=yes_no_parser(input(prompt+'\n(y/n)'))
+            if not input_value['valid_input']:
+                raise Exception('Invalid input')
             try_again=False
-            return_object = {'input':input_value,'valid_input':True}
+            return input_value
         except Exception as e:
-            print("\nSorry, didn't quite catch that. Remember answers are case sensitive \n", e,"\n")
+            print("\nSorry, didn't quite catch that. \n", e,"\n")
             if try_counter==3:
                 print("You've tried this three times now. I'm giving up on you.")
                 return_object =  {'input':None,'valid_input':False}
-    return return_object
+    
+
+def yes_no_parser(input_string):
+    capitalised_input_string=input_string.upper()
+    input_true={'input':True,'valid_input':True}
+    input_false={'input':False,'valid_input':True}
+    invalid_input={'input':None,'valid_input':False}
+    match capitalised_input_string:
+        case 'YES':
+            return input_true
+        case 'Y':
+            return input_true
+        case 'TRUE':
+            return input_true
+        case 'NO':
+            return input_false
+        case 'N':
+            return input_false
+        case 'FALSE':
+            return input_false
+        case _:
+            return invalid_input
 
 def try_again():
-    try_again_input=true_false_input('\nWould you like to run the script again?')
+    try_again_input=yes_no_input('\nWould you like to run the script again?')
     if try_again_input['valid_input']:
         return try_again_input['input']
     else:return False
@@ -321,7 +344,7 @@ while run_script == True:
                     for category in comparison_data['skipped_categories']:
                         print(category)
                     print('\nPlease verify the contents of these files as this data will not be part of the final comparison.')
-                    continue_input=true_false_input('\nWould you like to continue the comparison?')
+                    continue_input=yes_no_input('\nWould you like to continue the comparison?')
                     if continue_input['valid_input']:
                         comparison_data['continue_comparison']=continue_input['input']
                     else:

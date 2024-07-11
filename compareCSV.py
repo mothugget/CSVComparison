@@ -193,8 +193,8 @@ def yes_no_input(prompt):
         except Exception as e:
             print("\nSorry, didn't quite catch that. \n", e,"\n")
             if try_counter==3:
-                print("You've tried this three times now. I'm giving up on you.")
-                return_object =  {'input':None,'valid_input':False}
+                print("You've tried this three times now. I'm giving up on you.\n")
+                return {'input':None,'valid_input':False}
     
 
 def yes_no_parser(input_string):

@@ -268,7 +268,7 @@ def read_json_config_file():
 
 def is_list_subset(subset, set):
     missing_values=[x for x in subset if set.count(x)==0]
-    return missing_values==[]
+    return {'is_subset':missing_values==[],'missing_values':missing_values}
 
 def is_element_duplicate_or_unmatched(element,original_list,final_list):
     original_count=original_list.count(element)
@@ -320,11 +320,23 @@ while run_script == True:
         print('By default, this script looks at the directory in which it is being run.\nIt compares .csv files named original.csv and final.csv, and creates a folder with the results in the same directory.\n\nIf you wish to change any of these paths, or any other parameters, please see the file CSVComparisonConfig.json\nThe fieldnames are taken from the first row of the .csv files.\nIf no other value is specified, the fieldname of the values used to ID the rows of the CSV file is the first fieldname of the original file.\n')
         input('When the files and configurations are ready, press enter to continue:')
         read_csv_props = read_json_config_file()
-        if not is_list_subset(list(default_config.keys()), list(read_csv_props.keys())):
-            raise Exception('Config file is missing keys. To restart from a default config file, delete CSVComparisonConfig.json from the directory in which this script is running.') 
+        config_key_analysis=is_list_subset(list(default_config.keys()), list(read_csv_props.keys()))
+        if not config_key_analysis['is_subset']:
+            missing_keys= ''
+            for value in config_key_analysis['missing_values']:
+                missing_keys+=(value+'\n')
+            if len(config_key_analysis['missing_values'])>1:
+                plural='s'
+            else:
+                plural=''
+            
+            e ='\nConfig file is missing the following key'+plural+':\n\n'+missing_keys+ '\nPlease amend the config file.\nTo restart from a default config file, delete CSVComparisonConfig.json from the directory in which this script is running.'
+            raise Exception(e)
+            
+            
         results_path = read_csv_props['results_path']
     except Exception as e:
-        print('\nSomething went wrong\n',e)
+        print('\nSomething went wrong:\n',e)
         continue_read_csv=False
     if continue_read_csv:
         csv_results=read_csv_data(read_csv_props)
